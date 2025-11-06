@@ -1,0 +1,53 @@
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/config.schema.json",
+  "modules": [
+    {
+      "type": "logo",
+      "source": "arch"
+    },
+    "title",
+    "separator",
+    "os",
+    {
+      "type": "command",
+      "key": "OS Installation Date",
+      "text": "birth_install=$(stat -c %W / 2>/dev/null || echo 0); if [ \"$birth_install\" != \"0\" ]; then date -d @$birth_install '+%d %b %Y' 2>/dev/null || echo 'Unknown'; else echo 'Unknown'; fi"
+    },
+    {
+      "type": "command",
+      "key": "OS Age",
+      "text": "birth_install=$(stat -c %W / 2>/dev/null || echo 0); if [ \"$birth_install\" != \"0\" ]; then current=$(date +%s); days_difference=$(( (current - birth_install) / 86400 )); years=$(( days_difference / 365 )); days=$(( days_difference % 365 )); if [ $years -gt 0 ]; then echo \"$years year(s), $days day(s)\"; else echo \"$days day(s)\"; fi; else echo 'Unknown'; fi"
+    },
+    // "host",
+    "kernel",
+    "uptime",
+    "packages",
+    // "shell",
+
+    // "wmtheme",
+    // "theme",
+    // "icons",
+    // "font",
+    // "cursor",
+
+    "cpu",
+    "gpu",
+    {
+      "type": "command",
+      "key": "Display",
+      "text": "bash -c 'hyprctl monitors -j 2>/dev/null | jq -r \".[] | \\\"\\(.model) (\\(.width)x\\(.height) @ \\(.refreshRate | floor)Hz)\\\"\"'"
+    },
+    "memory",
+    "disk",
+    "de",
+    "wm",
+    "terminal",
+    // "localip",
+    // "publicip",
+    // "battery",
+    "poweradapter",
+    // "locale",
+    "break",
+    "colors"
+  ]
+}

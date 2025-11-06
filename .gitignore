@@ -1,0 +1,23 @@
+# Backup files
+*.backup
+*.bak
+*.old
+*.orig
+*~
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# EWW state (if using EWW)
+eww-state.yml
+
+# Waybar cache
+waybar-cache/

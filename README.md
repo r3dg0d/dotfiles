@@ -12,7 +12,7 @@ A collection of my dotfiles for a riced Linux desktop environment using Hyprland
 
 ## Screenshots
 
-*Add screenshots of your setup here*
+![My Desktop Setup](screenshot1.png)
 
 ## Installation
 

@@ -77,7 +77,7 @@ chmod +x ~/.config/waybar/scripts/*.sh
 sudo pacman -S hyprland waybar ghostty fastfetch
 
 # Optional packages
-sudo pacman -S cava playerctl jq  # For Waybar Spotify and visualizer
+sudo pacman -S cava jq curl python  # For Waybar Spotify and visualizer
 ```
 
 5. Reload Hyprland:
@@ -129,9 +129,50 @@ monitor=HDMI-A-1,3440x1440@179.99,1920x0,1
 
 ### Waybar Spotify
 
-The Spotify module requires:
-- `playerctl` installed
-- Spotify running (or another compatible media player)
+The Spotify integration uses the Spotify Web API to display track information and album art. It requires:
+
+1. **Spotify Developer Account Setup:**
+   - Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
+   - Click "Create an App"
+   - Fill in the app details (name, description)
+   - **Important:** Add `http://localhost:8888/callback` to the "Redirect URIs" list
+   - Copy your **Client ID** and **Client Secret**
+
+2. **Configure Credentials:**
+   - Edit `~/.config/mufetch/config.yaml` (create it if it doesn't exist):
+     ```yaml
+     spotify_client_id: YOUR_CLIENT_ID_HERE
+     spotify_client_secret: YOUR_CLIENT_SECRET_HERE
+     ```
+
+3. **Complete OAuth Authentication:**
+   - Run the OAuth script to authenticate:
+     ```bash
+     ~/.config/waybar/scripts/spotify-oauth.sh
+     ```
+   - This will:
+     - Open your browser for Spotify authorization
+     - Complete the OAuth flow automatically
+     - Save tokens to `~/.config/waybar/spotify_token.json`
+   - **Note:** You only need to do this once. Tokens will auto-refresh when needed.
+
+4. **Required Packages:**
+   ```bash
+   sudo pacman -S jq curl python
+   ```
+
+5. **Features:**
+   - Displays current track name and artist
+   - Shows album art
+   - Playback controls (play/pause, next, previous)
+   - Works automatically after reboot (no manual waybar restart needed)
+   - Uses Spotify API directly (no dependency on DBus/playerctl)
+
+**Troubleshooting:**
+- If track info doesn't appear after reboot, ensure the OAuth flow was completed
+- Check that `~/.config/waybar/spotify_token.json` exists
+- Verify your redirect URI matches exactly: `http://localhost:8888/callback`
+- Run `~/.config/waybar/scripts/spotify-info.sh` manually to test
 
 ### Keybindings
 
@@ -140,8 +181,17 @@ Main keybindings are in `~/.config/hypr/bindings.conf`. Edit to customize.
 ## Troubleshooting
 
 ### Waybar not showing Spotify
-- Ensure `playerctl` is installed: `sudo pacman -S playerctl`
-- Check if Spotify is running: `playerctl status`
+- **For Spotify API integration (recommended):**
+  - Ensure OAuth flow is completed: `~/.config/waybar/scripts/spotify-oauth.sh`
+  - Check that `~/.config/waybar/spotify_token.json` exists
+  - Verify credentials in `~/.config/mufetch/config.yaml`
+  - Test the script manually: `~/.config/waybar/scripts/spotify-info.sh`
+  - Ensure redirect URI `http://localhost:8888/callback` is added in Spotify Developer Dashboard
+  
+- **For legacy playerctl integration:**
+  - Ensure `playerctl` is installed: `sudo pacman -S playerctl`
+  - Check if Spotify is running: `playerctl status`
+  
 - **After modifying waybar config or scripts, restart waybar:**
   ```bash
   killall waybar && nohup waybar > /dev/null 2>&1 &

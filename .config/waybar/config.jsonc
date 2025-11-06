@@ -110,6 +110,7 @@
     "format": "{text}",
     "return-type": "json",
     "interval": 1,
+    "exec-on-event": true,
     "on-click": "playerctl -p spotify play-pause",
     "tooltip-format": "{tooltip}"
   },

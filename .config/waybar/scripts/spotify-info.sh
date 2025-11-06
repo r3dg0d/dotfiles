@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 
-# Script to get Spotify track info using Spotify Web API (via mufetch credentials)
-# Falls back to playerctl if API isn't set up yet
+# Script to get Spotify track info using multiple methods:
+# 1. Direct DBus/MPRIS queries (most reliable)
+# 2. playerctl (fallback)
+# 3. Spotify Web API (if OAuth is set up)
 
 PLAYER="spotify"
+DBUS_DEST="org.mpris.MediaPlayer2.spotify"
 CONFIG_FILE="$HOME/.config/mufetch/config.yaml"
 TOKEN_FILE="$HOME/.config/waybar/spotify_token.json"
 
@@ -18,6 +21,42 @@ json_escape() {
     printf '%s' "$str"
 }
 
+# Function to get metadata via direct DBus query
+get_dbus_metadata() {
+    local metadata=$(dbus-send --print-reply --dest="$DBUS_DEST" \
+        /org/mpris/MediaPlayer2 \
+        org.freedesktop.DBus.Properties.Get \
+        string:'org.mpris.MediaPlayer2.Player' \
+        string:'Metadata' 2>/dev/null)
+    
+    if [ -z "$metadata" ]; then
+        return 1
+    fi
+    
+    # Extract title (value comes after "xesam:title" on next line with "variant string")
+    local title=$(echo "$metadata" | grep -A 2 "xesam:title" | grep "variant" | grep "string" | sed 's/.*string "\(.*\)".*/\1/' | head -1)
+    
+    # Extract artist (first artist from array - comes after "xesam:artist" and "variant array")
+    local artist=$(echo "$metadata" | grep -A 5 "xesam:artist" | grep -A 3 "variant.*array" | grep "string" | sed 's/.*string "\(.*\)".*/\1/' | head -1)
+    
+    # Extract album (value comes after "xesam:album" on next line with "variant string")
+    local album=$(echo "$metadata" | grep -A 2 "xesam:album" | grep "variant" | grep "string" | sed 's/.*string "\(.*\)".*/\1/' | head -1)
+    
+    # Get playback status
+    local status=$(dbus-send --print-reply --dest="$DBUS_DEST" \
+        /org/mpris/MediaPlayer2 \
+        org.freedesktop.DBus.Properties.Get \
+        string:'org.mpris.MediaPlayer2.Player' \
+        string:'PlaybackStatus' 2>/dev/null | grep "variant" | grep "string" | sed 's/.*string "\(.*\)".*/\1/')
+    
+    if [ -n "$title" ] || [ -n "$artist" ]; then
+        echo "$title|$artist|$album|$status"
+        return 0
+    fi
+    
+    return 1
+}
+
 # Check if Spotify process is running
 SPOTIFY_RUNNING=false
 if pgrep -x "spotify" > /dev/null 2>&1 || pgrep -f "spotify" > /dev/null 2>&1; then
@@ -30,51 +69,64 @@ if [ "$SPOTIFY_RUNNING" = false ]; then
     exit 0
 fi
 
-# Try to get metadata from playerctl (primary method - faster and more reliable)
 ARTIST_RAW=""
 TITLE_RAW=""
 ALBUM_RAW=""
 STATUS="Unknown"
 
-# Try playerctl with retries
-if playerctl -l 2>/dev/null | grep -q "$PLAYER"; then
-    for i in {1..5}; do
-        ARTIST_RAW=$(playerctl -p "$PLAYER" metadata artist 2>/dev/null || echo "")
-        TITLE_RAW=$(playerctl -p "$PLAYER" metadata title 2>/dev/null || echo "")
-        ALBUM_RAW=$(playerctl -p "$PLAYER" metadata album 2>/dev/null || echo "")
-        STATUS=$(playerctl -p "$PLAYER" status 2>/dev/null || echo "Unknown")
-        
-        # Try xesam keys if short form didn't work
-        if [ -z "$ARTIST_RAW" ]; then
-            ARTIST_RAW=$(playerctl -p "$PLAYER" metadata xesam:artist 2>/dev/null || echo "")
-        fi
-        if [ -z "$TITLE_RAW" ]; then
-            TITLE_RAW=$(playerctl -p "$PLAYER" metadata xesam:title 2>/dev/null || echo "")
-        fi
-        if [ -z "$ALBUM_RAW" ]; then
-            ALBUM_RAW=$(playerctl -p "$PLAYER" metadata xesam:album 2>/dev/null || echo "")
-        fi
-        
-        # If we got metadata, break
-        if [ -n "$ARTIST_RAW" ] || [ -n "$TITLE_RAW" ]; then
-            break
-        fi
-        
-        # Wait before retrying (waybar polls every second, so we don't need long waits)
-        if [ $i -lt 5 ]; then
-            sleep 0.15
-        fi
-    done
+# Method 1: Try direct DBus query (most reliable, bypasses playerctl)
+DBUS_RESULT=$(get_dbus_metadata 2>/dev/null)
+if [ $? -eq 0 ] && [ -n "$DBUS_RESULT" ]; then
+    TITLE_RAW=$(echo "$DBUS_RESULT" | cut -d'|' -f1)
+    ARTIST_RAW=$(echo "$DBUS_RESULT" | cut -d'|' -f2)
+    ALBUM_RAW=$(echo "$DBUS_RESULT" | cut -d'|' -f3)
+    STATUS_RAW=$(echo "$DBUS_RESULT" | cut -d'|' -f4)
+    
+    if [ "$STATUS_RAW" = "Playing" ]; then
+        STATUS="Playing"
+    elif [ "$STATUS_RAW" = "Paused" ]; then
+        STATUS="Paused"
+    else
+        STATUS="Unknown"
+    fi
 fi
 
-# If playerctl didn't work, try Spotify Web API as fallback
-# This requires OAuth setup - see spotify-api-auth.sh for setup instructions
+# Method 2: Fallback to playerctl if DBus didn't work
+if [ -z "$ARTIST_RAW" ] && [ -z "$TITLE_RAW" ]; then
+    if playerctl -l 2>/dev/null | grep -q "$PLAYER"; then
+        for i in {1..5}; do
+            ARTIST_RAW=$(playerctl -p "$PLAYER" metadata artist 2>/dev/null || echo "")
+            TITLE_RAW=$(playerctl -p "$PLAYER" metadata title 2>/dev/null || echo "")
+            ALBUM_RAW=$(playerctl -p "$PLAYER" metadata album 2>/dev/null || echo "")
+            STATUS=$(playerctl -p "$PLAYER" status 2>/dev/null || echo "Unknown")
+            
+            # Try xesam keys if short form didn't work
+            if [ -z "$ARTIST_RAW" ]; then
+                ARTIST_RAW=$(playerctl -p "$PLAYER" metadata xesam:artist 2>/dev/null || echo "")
+            fi
+            if [ -z "$TITLE_RAW" ]; then
+                TITLE_RAW=$(playerctl -p "$PLAYER" metadata xesam:title 2>/dev/null || echo "")
+            fi
+            if [ -z "$ALBUM_RAW" ]; then
+                ALBUM_RAW=$(playerctl -p "$PLAYER" metadata xesam:album 2>/dev/null || echo "")
+            fi
+            
+            if [ -n "$ARTIST_RAW" ] || [ -n "$TITLE_RAW" ]; then
+                break
+            fi
+            
+            if [ $i -lt 5 ]; then
+                sleep 0.15
+            fi
+        done
+    fi
+fi
+
+# Method 3: Try Spotify Web API as last resort (requires OAuth setup)
 if [ -z "$ARTIST_RAW" ] && [ -z "$TITLE_RAW" ] && [ -f "$CONFIG_FILE" ] && [ -f "$TOKEN_FILE" ]; then
-    # Get access token
     ACCESS_TOKEN=$("$HOME/.config/waybar/scripts/spotify-api-auth.sh" 2>/dev/null)
     
     if [ -n "$ACCESS_TOKEN" ] && [ "$ACCESS_TOKEN" != "null" ]; then
-        # Get currently playing track from Spotify API
         API_RESPONSE=$(curl -s -X GET "https://api.spotify.com/v1/me/player/currently-playing" \
             -H "Authorization: Bearer $ACCESS_TOKEN" 2>/dev/null)
         

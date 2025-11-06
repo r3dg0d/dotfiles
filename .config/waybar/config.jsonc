@@ -106,7 +106,7 @@
     "on-click-backward": "~/.config/waybar/scripts/spotify-loop.sh"
   },
   "custom/spotify-info": {
-    "exec": "~/.config/waybar/scripts/spotify-info.sh",
+    "exec": "$HOME/.config/waybar/scripts/spotify-info.sh",
     "format": "{text}",
     "return-type": "json",
     "interval": 1,

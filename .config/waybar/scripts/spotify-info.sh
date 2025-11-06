@@ -30,10 +30,23 @@ TITLE_RAW=""
 ALBUM_RAW=""
 
 # Try to get metadata - retry up to 3 times if not available (handles race condition after login)
+# Try both short and full metadata field names for better compatibility
 for i in {1..3}; do
+    # Try short form first (artist, title, album)
     ARTIST_RAW=$(playerctl -p "$PLAYER" metadata artist 2>/dev/null || echo "")
     TITLE_RAW=$(playerctl -p "$PLAYER" metadata title 2>/dev/null || echo "")
     ALBUM_RAW=$(playerctl -p "$PLAYER" metadata album 2>/dev/null || echo "")
+    
+    # If short form didn't work, try full xesam keys
+    if [ -z "$ARTIST_RAW" ]; then
+        ARTIST_RAW=$(playerctl -p "$PLAYER" metadata xesam:artist 2>/dev/null || echo "")
+    fi
+    if [ -z "$TITLE_RAW" ]; then
+        TITLE_RAW=$(playerctl -p "$PLAYER" metadata xesam:title 2>/dev/null || echo "")
+    fi
+    if [ -z "$ALBUM_RAW" ]; then
+        ALBUM_RAW=$(playerctl -p "$PLAYER" metadata xesam:album 2>/dev/null || echo "")
+    fi
     
     # If we got metadata, break early
     if [ -n "$ARTIST_RAW" ] || [ -n "$TITLE_RAW" ]; then
@@ -42,7 +55,7 @@ for i in {1..3}; do
     
     # Only delay if we haven't found metadata and this isn't the last attempt
     if [ $i -lt 3 ]; then
-        sleep 0.05
+        sleep 0.1
     fi
 done
 

@@ -52,7 +52,8 @@ ALBUM_RAW=""
 # Try to get metadata - retry with short delays (waybar polls every second, so we don't need long waits)
 # Try both short and full metadata field names for better compatibility
 # After restart, metadata might not be available immediately, but waybar will keep polling
-for i in {1..3}; do
+# Increased retries to handle cases where metadata takes time to become available
+for i in {1..5}; do
     # If playerctl doesn't see Spotify yet, check again (it might have appeared since we last checked)
     if [ "$PLAYERCTL_SEES_SPOTIFY" = false ]; then
         if playerctl -l 2>/dev/null | grep -q "$PLAYER"; then
@@ -60,7 +61,7 @@ for i in {1..3}; do
         else
             # If still not detected after all our attempts, return empty and let waybar keep polling
             # Don't exit on first iteration - give it a chance to appear
-            if [ $i -eq 3 ]; then
+            if [ $i -eq 5 ]; then
                 echo '{"text":"","tooltip":""}'
                 exit 0
             fi
@@ -92,8 +93,8 @@ for i in {1..3}; do
     fi
     
     # Small delay only if we haven't found metadata yet (waybar will poll again anyway)
-    if [ $i -lt 3 ]; then
-        sleep 0.1
+    if [ $i -lt 5 ]; then
+        sleep 0.15
     fi
 done
 
@@ -112,14 +113,9 @@ if [ -z "$ARTIST_RAW" ] && [ -z "$TITLE_RAW" ]; then
         exit 0
     fi
     
-    # If playerctl sees Spotify but status is invalid, exit
-    if [ "$STATUS" != "Playing" ] && [ "$STATUS" != "Paused" ] && [ "$STATUS" != "Stopped" ] && [ "$STATUS" != "Unknown" ]; then
-        echo '{"text":"","tooltip":""}'
-        exit 0
-    fi
-    
-    # If status is valid but we still don't have metadata, return empty
-    # This will allow waybar to keep polling and eventually get metadata when it's available
+    # If playerctl sees Spotify, always return empty (not exit) to let waybar keep polling
+    # This ensures waybar will keep trying even if metadata isn't ready yet
+    # Don't exit based on status - metadata might become available even with "Unknown" status
     echo '{"text":"","tooltip":""}'
     exit 0
 fi

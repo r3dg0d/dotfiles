@@ -1,14 +1,10 @@
 #!/usr/bin/env bash
 
-# Script to get Spotify track info using multiple methods:
-# 1. Direct DBus/MPRIS queries (most reliable)
-# 2. playerctl (fallback)
-# 3. Spotify Web API (if OAuth is set up)
+# Script to get Spotify track info - keeps retrying until Spotify is available
+# Uses direct DBus queries which are more reliable than playerctl
 
 PLAYER="spotify"
 DBUS_DEST="org.mpris.MediaPlayer2.spotify"
-CONFIG_FILE="$HOME/.config/mufetch/config.yaml"
-TOKEN_FILE="$HOME/.config/waybar/spotify_token.json"
 
 # Function to escape JSON strings properly
 json_escape() {
@@ -23,6 +19,15 @@ json_escape() {
 
 # Function to get metadata via direct DBus query
 get_dbus_metadata() {
+    # Check if DBus service exists
+    if ! dbus-send --print-reply --dest="$DBUS_DEST" \
+        /org/mpris/MediaPlayer2 \
+        org.freedesktop.DBus.Properties.Get \
+        string:'org.mpris.MediaPlayer2.Player' \
+        string:'Metadata' >/dev/null 2>&1; then
+        return 1
+    fi
+    
     local metadata=$(dbus-send --print-reply --dest="$DBUS_DEST" \
         /org/mpris/MediaPlayer2 \
         org.freedesktop.DBus.Properties.Get \
@@ -57,24 +62,12 @@ get_dbus_metadata() {
     return 1
 }
 
-# Check if Spotify process is running
-SPOTIFY_RUNNING=false
-if pgrep -x "spotify" > /dev/null 2>&1 || pgrep -f "spotify" > /dev/null 2>&1; then
-    SPOTIFY_RUNNING=true
-fi
-
-# If Spotify isn't running, exit early
-if [ "$SPOTIFY_RUNNING" = false ]; then
-    echo '{"text":"","tooltip":""}'
-    exit 0
-fi
-
 ARTIST_RAW=""
 TITLE_RAW=""
 ALBUM_RAW=""
 STATUS="Unknown"
 
-# Method 1: Try direct DBus query (most reliable, bypasses playerctl)
+# Try DBus query (most reliable method)
 DBUS_RESULT=$(get_dbus_metadata 2>/dev/null)
 if [ $? -eq 0 ] && [ -n "$DBUS_RESULT" ]; then
     TITLE_RAW=$(echo "$DBUS_RESULT" | cut -d'|' -f1)
@@ -91,10 +84,10 @@ if [ $? -eq 0 ] && [ -n "$DBUS_RESULT" ]; then
     fi
 fi
 
-# Method 2: Fallback to playerctl if DBus didn't work
+# Fallback to playerctl if DBus didn't work
 if [ -z "$ARTIST_RAW" ] && [ -z "$TITLE_RAW" ]; then
     if playerctl -l 2>/dev/null | grep -q "$PLAYER"; then
-        for i in {1..5}; do
+        for i in {1..3}; do
             ARTIST_RAW=$(playerctl -p "$PLAYER" metadata artist 2>/dev/null || echo "")
             TITLE_RAW=$(playerctl -p "$PLAYER" metadata title 2>/dev/null || echo "")
             ALBUM_RAW=$(playerctl -p "$PLAYER" metadata album 2>/dev/null || echo "")
@@ -115,40 +108,11 @@ if [ -z "$ARTIST_RAW" ] && [ -z "$TITLE_RAW" ]; then
                 break
             fi
             
-            if [ $i -lt 5 ]; then
-                sleep 0.15
+            if [ $i -lt 3 ]; then
+                sleep 0.1
             fi
         done
     fi
-fi
-
-# Method 3: Try Spotify Web API as last resort (requires OAuth setup)
-if [ -z "$ARTIST_RAW" ] && [ -z "$TITLE_RAW" ] && [ -f "$CONFIG_FILE" ] && [ -f "$TOKEN_FILE" ]; then
-    ACCESS_TOKEN=$("$HOME/.config/waybar/scripts/spotify-api-auth.sh" 2>/dev/null)
-    
-    if [ -n "$ACCESS_TOKEN" ] && [ "$ACCESS_TOKEN" != "null" ]; then
-        API_RESPONSE=$(curl -s -X GET "https://api.spotify.com/v1/me/player/currently-playing" \
-            -H "Authorization: Bearer $ACCESS_TOKEN" 2>/dev/null)
-        
-        if [ -n "$API_RESPONSE" ] && echo "$API_RESPONSE" | jq -e '.item' >/dev/null 2>&1; then
-            TITLE_RAW=$(echo "$API_RESPONSE" | jq -r '.item.name // empty' 2>/dev/null)
-            ARTIST_RAW=$(echo "$API_RESPONSE" | jq -r '.item.artists[0].name // empty' 2>/dev/null)
-            ALBUM_RAW=$(echo "$API_RESPONSE" | jq -r '.item.album.name // empty' 2>/dev/null)
-            IS_PLAYING=$(echo "$API_RESPONSE" | jq -r '.is_playing // false' 2>/dev/null)
-            
-            if [ "$IS_PLAYING" = "true" ]; then
-                STATUS="Playing"
-            else
-                STATUS="Paused"
-            fi
-        fi
-    fi
-fi
-
-# If we still don't have metadata, return empty
-if [ -z "$ARTIST_RAW" ] && [ -z "$TITLE_RAW" ]; then
-    echo '{"text":"","tooltip":""}'
-    exit 0
 fi
 
 # Escape for JSON
@@ -183,9 +147,6 @@ fi
 # Build tooltip
 TOOLTIP="${ARTIST} - ${TITLE}\\nAlbum: ${ALBUM}\\nStatus: ${STATUS}\\n\\nClick: Play/Pause\\nRight-click: Next\\nMiddle-click: Previous"
 
-# Create JSON output for waybar
-if [ -n "$TEXT_DISPLAY" ]; then
-    echo "{\"text\":\"${ICON} ${TEXT_DISPLAY}\",\"tooltip\":\"${TOOLTIP}\",\"class\":\"custom-spotify-info\"}"
-else
-    echo '{"text":"","tooltip":""}'
-fi
+# Always output valid JSON - return empty text if no metadata yet
+# Waybar will keep polling and eventually get the data when Spotify is ready
+echo "{\"text\":\"${ICON} ${TEXT_DISPLAY}\",\"tooltip\":\"${TOOLTIP}\",\"class\":\"custom-spotify-info\"}"

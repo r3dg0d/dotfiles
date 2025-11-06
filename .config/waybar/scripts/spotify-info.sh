@@ -23,17 +23,25 @@ if pgrep -x "spotify" > /dev/null 2>&1 || pgrep -f "spotify" > /dev/null 2>&1; t
     SPOTIFY_RUNNING=true
 fi
 
-# Check if playerctl sees Spotify
-PLAYERCTL_SEES_SPOTIFY=false
-if playerctl -l 2>/dev/null | grep -q "$PLAYER"; then
-    PLAYERCTL_SEES_SPOTIFY=true
-fi
-
-# If neither Spotify nor playerctl sees it, exit early
-if [ "$SPOTIFY_RUNNING" = false ] && [ "$PLAYERCTL_SEES_SPOTIFY" = false ]; then
+# If Spotify isn't running at all, exit early
+if [ "$SPOTIFY_RUNNING" = false ]; then
     echo '{"text":"","tooltip":""}'
     exit 0
 fi
+
+# Wait a bit for playerctl to detect Spotify if it's running but not detected yet
+# This is common after a system restart
+PLAYERCTL_SEES_SPOTIFY=false
+for wait_attempt in {1..3}; do
+    if playerctl -l 2>/dev/null | grep -q "$PLAYER"; then
+        PLAYERCTL_SEES_SPOTIFY=true
+        break
+    fi
+    # Wait a bit for playerctl to catch up (only if Spotify is running)
+    if [ $wait_attempt -lt 3 ]; then
+        sleep 0.2
+    fi
+done
 
 # Get metadata first - this is more reliable than status check
 # After restart, metadata might not be available immediately, so retry more aggressively
@@ -41,9 +49,24 @@ ARTIST_RAW=""
 TITLE_RAW=""
 ALBUM_RAW=""
 
-# Try to get metadata - retry up to 5 times with increasing delays (handles restart scenarios)
+# Try to get metadata - retry with short delays (waybar polls every second, so we don't need long waits)
 # Try both short and full metadata field names for better compatibility
-for i in {1..5}; do
+# After restart, metadata might not be available immediately, but waybar will keep polling
+for i in {1..3}; do
+    # If playerctl doesn't see Spotify yet, check again (it might have appeared)
+    if [ "$PLAYERCTL_SEES_SPOTIFY" = false ]; then
+        if playerctl -l 2>/dev/null | grep -q "$PLAYER"; then
+            PLAYERCTL_SEES_SPOTIFY=true
+        else
+            # If still not detected, return empty quickly - waybar will poll again in 1 second
+            # This is faster than waiting here
+            if [ $i -eq 1 ]; then
+                echo '{"text":"","tooltip":""}'
+                exit 0
+            fi
+        fi
+    fi
+    
     # Try short form first (artist, title, album)
     ARTIST_RAW=$(playerctl -p "$PLAYER" metadata artist 2>/dev/null || echo "")
     TITLE_RAW=$(playerctl -p "$PLAYER" metadata title 2>/dev/null || echo "")
@@ -65,14 +88,9 @@ for i in {1..5}; do
         break
     fi
     
-    # Progressive delay: 0.1s, 0.2s, 0.3s, 0.4s (last attempt has no delay)
-    if [ $i -lt 5 ]; then
-        case $i in
-            1) sleep 0.1 ;;
-            2) sleep 0.2 ;;
-            3) sleep 0.3 ;;
-            4) sleep 0.4 ;;
-        esac
+    # Small delay only if we haven't found metadata yet (waybar will poll again anyway)
+    if [ $i -lt 3 ]; then
+        sleep 0.1
     fi
 done
 

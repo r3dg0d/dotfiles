@@ -22,21 +22,45 @@ if ! playerctl -l 2>/dev/null | grep -q "$PLAYER"; then
     exit 0
 fi
 
-# Get status
-STATUS=$(playerctl -p "$PLAYER" status 2>/dev/null)
-if [ "$STATUS" != "Playing" ] && [ "$STATUS" != "Paused" ]; then
-    echo '{"text":"","tooltip":""}'
-    exit 0
-fi
+# Get metadata first - this is more reliable than status check
+# After login, metadata might be available even if status is not Playing/Paused
+# Try multiple times with slight delay if metadata isn't immediately available
+ARTIST_RAW=""
+TITLE_RAW=""
+ALBUM_RAW=""
 
-# Get metadata - get raw values first
-ARTIST_RAW=$(playerctl -p "$PLAYER" metadata artist 2>/dev/null || echo "")
-TITLE_RAW=$(playerctl -p "$PLAYER" metadata title 2>/dev/null || echo "")
-ALBUM_RAW=$(playerctl -p "$PLAYER" metadata album 2>/dev/null || echo "")
+# Try to get metadata - retry up to 3 times if not available (handles race condition after login)
+for i in {1..3}; do
+    ARTIST_RAW=$(playerctl -p "$PLAYER" metadata artist 2>/dev/null || echo "")
+    TITLE_RAW=$(playerctl -p "$PLAYER" metadata title 2>/dev/null || echo "")
+    ALBUM_RAW=$(playerctl -p "$PLAYER" metadata album 2>/dev/null || echo "")
+    
+    # If we got metadata, break early
+    if [ -n "$ARTIST_RAW" ] || [ -n "$TITLE_RAW" ]; then
+        break
+    fi
+    
+    # Only delay if we haven't found metadata and this isn't the last attempt
+    if [ $i -lt 3 ]; then
+        sleep 0.05
+    fi
+done
+
+# Get status - but don't exit early based on it if we have metadata
+STATUS=$(playerctl -p "$PLAYER" status 2>/dev/null || echo "Unknown")
 LOOP_STATUS=$(playerctl -p "$PLAYER" loop 2>/dev/null || echo "None")
 
-# Check if we have valid metadata
+# Check if we have valid metadata - if we do, show it regardless of status
+# This handles the case where Spotify is detected but not actively playing
 if [ -z "$ARTIST_RAW" ] && [ -z "$TITLE_RAW" ]; then
+    # No metadata available - check if status is valid before exiting
+    # Allow Stopped status to pass through, as metadata might still be available
+    if [ "$STATUS" != "Playing" ] && [ "$STATUS" != "Paused" ] && [ "$STATUS" != "Stopped" ]; then
+        echo '{"text":"","tooltip":""}'
+        exit 0
+    fi
+    # If status is valid but we still don't have metadata, return empty
+    # This will allow waybar to keep polling and eventually get metadata when it's available
     echo '{"text":"","tooltip":""}'
     exit 0
 fi

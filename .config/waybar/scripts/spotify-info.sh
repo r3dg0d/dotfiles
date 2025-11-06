@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
 # Script to get Spotify track info using Spotify Web API (via mufetch credentials)
-# This is more reliable than playerctl after system restarts
+# Falls back to playerctl if API isn't set up yet
 
 PLAYER="spotify"
 CONFIG_FILE="$HOME/.config/mufetch/config.yaml"
+TOKEN_FILE="$HOME/.config/waybar/spotify_token.json"
 
 # Function to escape JSON strings properly
 json_escape() {
@@ -29,23 +30,21 @@ if [ "$SPOTIFY_RUNNING" = false ]; then
     exit 0
 fi
 
-# Try to get metadata from playerctl first (faster, no API calls needed)
-# Fall back to Spotify API if playerctl metadata isn't available yet
+# Try to get metadata from playerctl (primary method - faster and more reliable)
 ARTIST_RAW=""
 TITLE_RAW=""
 ALBUM_RAW=""
 STATUS="Unknown"
 
-# Try playerctl first - it's faster and doesn't require API calls
+# Try playerctl with retries
 if playerctl -l 2>/dev/null | grep -q "$PLAYER"; then
-    # Try to get metadata with retries
-    for i in {1..3}; do
+    for i in {1..5}; do
         ARTIST_RAW=$(playerctl -p "$PLAYER" metadata artist 2>/dev/null || echo "")
         TITLE_RAW=$(playerctl -p "$PLAYER" metadata title 2>/dev/null || echo "")
         ALBUM_RAW=$(playerctl -p "$PLAYER" metadata album 2>/dev/null || echo "")
         STATUS=$(playerctl -p "$PLAYER" status 2>/dev/null || echo "Unknown")
         
-        # If short form didn't work, try full xesam keys
+        # Try xesam keys if short form didn't work
         if [ -z "$ARTIST_RAW" ]; then
             ARTIST_RAW=$(playerctl -p "$PLAYER" metadata xesam:artist 2>/dev/null || echo "")
         fi
@@ -61,25 +60,36 @@ if playerctl -l 2>/dev/null | grep -q "$PLAYER"; then
             break
         fi
         
-        if [ $i -lt 3 ]; then
-            sleep 0.2
+        # Wait before retrying (waybar polls every second, so we don't need long waits)
+        if [ $i -lt 5 ]; then
+            sleep 0.15
         fi
     done
 fi
 
 # If playerctl didn't work, try Spotify Web API as fallback
-if [ -z "$ARTIST_RAW" ] && [ -z "$TITLE_RAW" ] && [ -f "$CONFIG_FILE" ]; then
-    # Read credentials from mufetch config
-    CLIENT_ID=$(grep "spotify_client_id:" "$CONFIG_FILE" | awk '{print $2}' | tr -d '"')
-    CLIENT_SECRET=$(grep "spotify_client_secret:" "$CONFIG_FILE" | awk '{print $2}' | tr -d '"')
+# This requires OAuth setup - see spotify-api-auth.sh for setup instructions
+if [ -z "$ARTIST_RAW" ] && [ -z "$TITLE_RAW" ] && [ -f "$CONFIG_FILE" ] && [ -f "$TOKEN_FILE" ]; then
+    # Get access token
+    ACCESS_TOKEN=$("$HOME/.config/waybar/scripts/spotify-api-auth.sh" 2>/dev/null)
     
-    if [ -n "$CLIENT_ID" ] && [ -n "$CLIENT_SECRET" ]; then
-        # Get access token (using client credentials flow - note: this won't work for user endpoints)
-        # For "currently playing", we'd need user authorization, which is complex
-        # So we'll stick with playerctl for now, but this structure allows for future API integration
-        # For now, just return empty and let waybar keep polling
-        echo '{"text":"","tooltip":""}'
-        exit 0
+    if [ -n "$ACCESS_TOKEN" ] && [ "$ACCESS_TOKEN" != "null" ]; then
+        # Get currently playing track from Spotify API
+        API_RESPONSE=$(curl -s -X GET "https://api.spotify.com/v1/me/player/currently-playing" \
+            -H "Authorization: Bearer $ACCESS_TOKEN" 2>/dev/null)
+        
+        if [ -n "$API_RESPONSE" ] && echo "$API_RESPONSE" | jq -e '.item' >/dev/null 2>&1; then
+            TITLE_RAW=$(echo "$API_RESPONSE" | jq -r '.item.name // empty' 2>/dev/null)
+            ARTIST_RAW=$(echo "$API_RESPONSE" | jq -r '.item.artists[0].name // empty' 2>/dev/null)
+            ALBUM_RAW=$(echo "$API_RESPONSE" | jq -r '.item.album.name // empty' 2>/dev/null)
+            IS_PLAYING=$(echo "$API_RESPONSE" | jq -r '.is_playing // false' 2>/dev/null)
+            
+            if [ "$IS_PLAYING" = "true" ]; then
+                STATUS="Playing"
+            else
+                STATUS="Paused"
+            fi
+        fi
     fi
 fi
 
@@ -125,5 +135,5 @@ TOOLTIP="${ARTIST} - ${TITLE}\\nAlbum: ${ALBUM}\\nStatus: ${STATUS}\\n\\nClick: 
 if [ -n "$TEXT_DISPLAY" ]; then
     echo "{\"text\":\"${ICON} ${TEXT_DISPLAY}\",\"tooltip\":\"${TOOLTIP}\",\"class\":\"custom-spotify-info\"}"
 else
-    echo "{\"text\":\"\",\"tooltip\":\"\"}"
+    echo '{"text":"","tooltip":""}'
 fi

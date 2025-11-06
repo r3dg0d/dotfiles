@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 
-# Script to get Spotify track info - keeps retrying until Spotify is available
-# Uses direct DBus queries which are more reliable than playerctl
+# Script to get Spotify track info using Spotify API
+# Uses Spotify API via spotify-api-auth.sh instead of DBus/playerctl
 
-PLAYER="spotify"
-DBUS_DEST="org.mpris.MediaPlayer2.spotify"
+# Redirect stderr to /dev/null to prevent any error messages from interfering
+exec 2>/dev/null
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+AUTH_SCRIPT="$SCRIPT_DIR/spotify-api-auth.sh"
 
 # Function to escape JSON strings properly
 json_escape() {
@@ -17,115 +20,95 @@ json_escape() {
     printf '%s' "$str"
 }
 
-# Function to get metadata via direct DBus query
-get_dbus_metadata() {
-    # Check if DBus service exists
-    if ! dbus-send --print-reply --dest="$DBUS_DEST" \
-        /org/mpris/MediaPlayer2 \
-        org.freedesktop.DBus.Properties.Get \
-        string:'org.mpris.MediaPlayer2.Player' \
-        string:'Metadata' >/dev/null 2>&1; then
-        return 1
-    fi
+# Function to output JSON (always valid, even on error)
+# Match the format used in spotify.sh for consistency
+output_json() {
+    local text="$1"
+    local tooltip="$2"
+    local icon="$3"
+    local artist="$4"
+    local title="$5"
+    local album="$6"
+    local status="$7"
+    local class="${8:-custom-spotify-info}"
     
-    local metadata=$(dbus-send --print-reply --dest="$DBUS_DEST" \
-        /org/mpris/MediaPlayer2 \
-        org.freedesktop.DBus.Properties.Get \
-        string:'org.mpris.MediaPlayer2.Player' \
-        string:'Metadata' 2>/dev/null)
+    # Ensure all fields are set
+    text="${text:-}"
+    tooltip="${tooltip:-}"
+    icon="${icon:-}"
+    artist="${artist:-}"
+    title="${title:-}"
+    album="${album:-}"
+    status="${status:-}"
     
-    if [ -z "$metadata" ]; then
-        return 1
-    fi
-    
-    # Extract title (value comes after "xesam:title" on next line with "variant string")
-    local title=$(echo "$metadata" | grep -A 2 "xesam:title" | grep "variant" | grep "string" | sed 's/.*string "\(.*\)".*/\1/' | head -1)
-    
-    # Extract artist (first artist from array - comes after "xesam:artist" and "variant array")
-    local artist=$(echo "$metadata" | grep -A 5 "xesam:artist" | grep -A 3 "variant.*array" | grep "string" | sed 's/.*string "\(.*\)".*/\1/' | head -1)
-    
-    # Extract album (value comes after "xesam:album" on next line with "variant string")
-    local album=$(echo "$metadata" | grep -A 2 "xesam:album" | grep "variant" | grep "string" | sed 's/.*string "\(.*\)".*/\1/' | head -1)
-    
-    # Get playback status
-    local status=$(dbus-send --print-reply --dest="$DBUS_DEST" \
-        /org/mpris/MediaPlayer2 \
-        org.freedesktop.DBus.Properties.Get \
-        string:'org.mpris.MediaPlayer2.Player' \
-        string:'PlaybackStatus' 2>/dev/null | grep "variant" | grep "string" | sed 's/.*string "\(.*\)".*/\1/')
-    
-    if [ -n "$title" ] || [ -n "$artist" ]; then
-        echo "$title|$artist|$album|$status"
-        return 0
-    fi
-    
-    return 1
+    printf "{\"text\":\"%s\",\"tooltip\":\"%s\",\"icon\":\"%s\",\"artist\":\"%s\",\"title\":\"%s\",\"album\":\"%s\",\"alt\":\"%s\",\"class\":\"%s\"}\n" \
+        "$(json_escape "$text")" \
+        "$(json_escape "$tooltip")" \
+        "$(json_escape "$icon")" \
+        "$(json_escape "$artist")" \
+        "$(json_escape "$title")" \
+        "$(json_escape "$album")" \
+        "$(json_escape "$status")" \
+        "$class"
 }
 
-ARTIST_RAW=""
-TITLE_RAW=""
-ALBUM_RAW=""
-STATUS="Unknown"
+# Trap to ensure we always output valid JSON on exit
+trap 'output_json "" "Error getting Spotify info"' EXIT ERR
 
-# Try DBus query (most reliable method)
-DBUS_RESULT=$(get_dbus_metadata 2>/dev/null)
-if [ $? -eq 0 ] && [ -n "$DBUS_RESULT" ]; then
-    TITLE_RAW=$(echo "$DBUS_RESULT" | cut -d'|' -f1)
-    ARTIST_RAW=$(echo "$DBUS_RESULT" | cut -d'|' -f2)
-    ALBUM_RAW=$(echo "$DBUS_RESULT" | cut -d'|' -f3)
-    STATUS_RAW=$(echo "$DBUS_RESULT" | cut -d'|' -f4)
-    
-    if [ "$STATUS_RAW" = "Playing" ]; then
-        STATUS="Playing"
-    elif [ "$STATUS_RAW" = "Paused" ]; then
-        STATUS="Paused"
-    else
-        STATUS="Unknown"
-    fi
+# Get access token (with retry on first run)
+ACCESS_TOKEN=$("$AUTH_SCRIPT" 2>/dev/null)
+
+# If no token and token file doesn't exist, wait a moment and retry (handles boot timing)
+if [ -z "$ACCESS_TOKEN" ] && [ ! -f "$HOME/.config/waybar/spotify_token.json" ]; then
+    sleep 0.5
+    ACCESS_TOKEN=$("$AUTH_SCRIPT" 2>/dev/null)
 fi
 
-# Fallback to playerctl if DBus didn't work
-if [ -z "$ARTIST_RAW" ] && [ -z "$TITLE_RAW" ]; then
-    if playerctl -l 2>/dev/null | grep -q "$PLAYER"; then
-        for i in {1..3}; do
-            ARTIST_RAW=$(playerctl -p "$PLAYER" metadata artist 2>/dev/null || echo "")
-            TITLE_RAW=$(playerctl -p "$PLAYER" metadata title 2>/dev/null || echo "")
-            ALBUM_RAW=$(playerctl -p "$PLAYER" metadata album 2>/dev/null || echo "")
-            STATUS=$(playerctl -p "$PLAYER" status 2>/dev/null || echo "Unknown")
-            
-            # Try xesam keys if short form didn't work
-            if [ -z "$ARTIST_RAW" ]; then
-                ARTIST_RAW=$(playerctl -p "$PLAYER" metadata xesam:artist 2>/dev/null || echo "")
-            fi
-            if [ -z "$TITLE_RAW" ]; then
-                TITLE_RAW=$(playerctl -p "$PLAYER" metadata xesam:title 2>/dev/null || echo "")
-            fi
-            if [ -z "$ALBUM_RAW" ]; then
-                ALBUM_RAW=$(playerctl -p "$PLAYER" metadata xesam:album 2>/dev/null || echo "")
-            fi
-            
-            if [ -n "$ARTIST_RAW" ] || [ -n "$TITLE_RAW" ]; then
-                break
-            fi
-            
-            if [ $i -lt 3 ]; then
-                sleep 0.1
-            fi
-        done
-    fi
+if [ -z "$ACCESS_TOKEN" ]; then
+    # No valid token - return empty but valid JSON
+    trap - EXIT ERR  # Clear trap since we're exiting normally
+    output_json "" "Waiting for Spotify authentication..." "" "" "" "" "" ""
+    exit 0
+fi
+
+# Get currently playing track from Spotify API
+API_RESPONSE=$(curl -s -X GET "https://api.spotify.com/v1/me/player/currently-playing" \
+    -H "Authorization: Bearer $ACCESS_TOKEN" 2>/dev/null)
+
+# Check if we got a valid response
+if [ -z "$API_RESPONSE" ] || echo "$API_RESPONSE" | jq -e '.error' >/dev/null 2>&1; then
+    # No track playing or error - return empty but valid JSON
+    trap - EXIT ERR
+    output_json "" "No track playing" "" "" "" "" "" ""
+    exit 0
+fi
+
+# Check if response indicates no track playing
+if echo "$API_RESPONSE" | jq -e '.item == null' >/dev/null 2>&1; then
+    trap - EXIT ERR
+    output_json "" "No track playing" "" "" "" "" "" ""
+    exit 0
+fi
+
+# Extract track information
+TITLE_RAW=$(echo "$API_RESPONSE" | jq -r '.item.name // ""' 2>/dev/null)
+ARTIST_RAW=$(echo "$API_RESPONSE" | jq -r '.item.artists[0].name // ""' 2>/dev/null)
+ALBUM_RAW=$(echo "$API_RESPONSE" | jq -r '.item.album.name // ""' 2>/dev/null)
+IS_PLAYING=$(echo "$API_RESPONSE" | jq -r '.is_playing // false' 2>/dev/null)
+
+# Determine status
+if [ "$IS_PLAYING" = "true" ]; then
+    STATUS="Playing"
+    ICON="󰏤"  # Pause icon
+else
+    STATUS="Paused"
+    ICON="󰐊"  # Play icon
 fi
 
 # Escape for JSON
 ARTIST=$(json_escape "$ARTIST_RAW")
 TITLE=$(json_escape "$TITLE_RAW")
 ALBUM=$(json_escape "$ALBUM_RAW")
-
-# Set icon based on status
-if [ "$STATUS" = "Playing" ]; then
-    ICON="󰏤"  # Pause icon
-else
-    ICON="󰐊"  # Play icon
-fi
 
 # Create display text
 if [ -n "$ARTIST" ] && [ -n "$TITLE" ]; then
@@ -145,8 +128,12 @@ if [ ${#TEXT_DISPLAY} -gt 40 ]; then
 fi
 
 # Build tooltip
-TOOLTIP="${ARTIST} - ${TITLE}\\nAlbum: ${ALBUM}\\nStatus: ${STATUS}\\n\\nClick: Play/Pause\\nRight-click: Next\\nMiddle-click: Previous"
+if [ -n "$ARTIST" ] || [ -n "$TITLE" ]; then
+    TOOLTIP="${ARTIST} - ${TITLE}\\nAlbum: ${ALBUM}\\nStatus: ${STATUS}\\n\\nClick: Play/Pause\\nRight-click: Next\\nMiddle-click: Previous"
+else
+    TOOLTIP="Waiting for Spotify..."
+fi
 
-# Always output valid JSON - return empty text if no metadata yet
-# Waybar will keep polling and eventually get the data when Spotify is ready
-echo "{\"text\":\"${ICON} ${TEXT_DISPLAY}\",\"tooltip\":\"${TOOLTIP}\",\"class\":\"custom-spotify-info\"}"
+# Output JSON for waybar (matching spotify.sh format)
+trap - EXIT ERR  # Clear trap since we're exiting normally
+output_json "${ICON} ${TEXT_DISPLAY}" "$TOOLTIP" "$ICON" "$ARTIST_RAW" "$TITLE_RAW" "$ALBUM_RAW" "$STATUS" "custom-spotify-info"

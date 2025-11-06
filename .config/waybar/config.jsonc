@@ -95,7 +95,7 @@
     "tooltip": false
   },
   "image#spotify-art": {
-    "exec": "~/.config/waybar/scripts/spotify-art.sh",
+    "exec": "/home/r3dg0d/.config/waybar/scripts/spotify-art.sh",
     "size": 32,
     "interval": 2,
     "on-click": "playerctl -p spotify play-pause",
@@ -106,16 +106,14 @@
     "on-click-backward": "~/.config/waybar/scripts/spotify-loop.sh"
   },
   "custom/spotify-info": {
-    "exec": "~/.config/waybar/scripts/spotify-info.sh",
-    "format": "{text}",
+    "exec": "/home/r3dg0d/.config/waybar/scripts/spotify-info.sh",
     "return-type": "json",
     "interval": 1,
     "exec-on-event": true,
     "signal": 8,
     "on-click": "playerctl -p spotify play-pause",
     "on-click-right": "playerctl -p spotify next",
-    "on-click-middle": "playerctl -p spotify previous",
-    "tooltip-format": "{tooltip}"
+    "on-click-middle": "playerctl -p spotify previous"
   },
   "custom/spotify-prev": {
     "exec": "~/.config/waybar/scripts/spotify-control.sh prev",

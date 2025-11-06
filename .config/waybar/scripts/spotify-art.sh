@@ -1,31 +1,59 @@
 #!/usr/bin/env bash
 
-# Script to fetch and save Spotify album art for waybar image module
+# Script to fetch and save Spotify album art using Spotify API
+# Uses Spotify API via spotify-api-auth.sh instead of DBus/playerctl
 
-PLAYER="spotify"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+AUTH_SCRIPT="$SCRIPT_DIR/spotify-api-auth.sh"
 ALBUM_ART_PATH="/tmp/spotify_album_art.jpg"
-ALBUM_ART_URL=$(playerctl -p "$PLAYER" metadata mpris:artUrl 2>/dev/null)
 
-# Check if Spotify is running and playing
-if ! playerctl -l 2>/dev/null | grep -q "$PLAYER"; then
-    # Remove old album art if Spotify is not running
-    [ -f "$ALBUM_ART_PATH" ] && rm -f "$ALBUM_ART_PATH"
+# Get access token
+ACCESS_TOKEN=$("$AUTH_SCRIPT" 2>/dev/null)
+
+if [ -z "$ACCESS_TOKEN" ]; then
+    # No valid token - keep existing art if present
+    if [ -f "$ALBUM_ART_PATH" ]; then
+        echo "$ALBUM_ART_PATH"
+    fi
     exit 0
 fi
 
-STATUS=$(playerctl -p "$PLAYER" status 2>/dev/null)
-if [ "$STATUS" != "Playing" ] && [ "$STATUS" != "Paused" ]; then
+# Get currently playing track from Spotify API
+API_RESPONSE=$(curl -s -X GET "https://api.spotify.com/v1/me/player/currently-playing" \
+    -H "Authorization: Bearer $ACCESS_TOKEN" 2>/dev/null)
+
+# Check if we got a valid response
+if [ -z "$API_RESPONSE" ] || echo "$API_RESPONSE" | jq -e '.error' >/dev/null 2>&1; then
+    # No track playing or error - keep existing art if present
+    if [ -f "$ALBUM_ART_PATH" ]; then
+        echo "$ALBUM_ART_PATH"
+    fi
     exit 0
 fi
 
-# Download album art if URL exists and is different
-if [ -n "$ALBUM_ART_URL" ]; then
-    # Check if we need to update (compare URL or check if file exists)
+# Check if response indicates no track playing
+if echo "$API_RESPONSE" | jq -e '.item == null' >/dev/null 2>&1; then
+    if [ -f "$ALBUM_ART_PATH" ]; then
+        echo "$ALBUM_ART_PATH"
+    fi
+    exit 0
+fi
+
+# Extract album art URL (use the largest available image)
+ALBUM_ART_URL=$(echo "$API_RESPONSE" | jq -r '.item.album.images[0].url // .item.album.images[1].url // .item.album.images[2].url // ""' 2>/dev/null)
+
+# Download album art if URL exists
+if [ -n "$ALBUM_ART_URL" ] && [ "$ALBUM_ART_URL" != "null" ]; then
+    # Check if we need to update (download if file doesn't exist or is older than 10 seconds)
     if [ ! -f "$ALBUM_ART_PATH" ] || [ "$(stat -c %Y "$ALBUM_ART_PATH" 2>/dev/null || echo 0)" -lt $(($(date +%s) - 10)) ]; then
         curl -s -L "$ALBUM_ART_URL" -o "$ALBUM_ART_PATH" 2>/dev/null
     fi
-    echo "$ALBUM_ART_PATH"
+    
+    # Output path if file exists and is valid
+    if [ -f "$ALBUM_ART_PATH" ] && [ -s "$ALBUM_ART_PATH" ]; then
+        echo "$ALBUM_ART_PATH"
+    fi
 else
+    # No album art URL - remove old art if present
     [ -f "$ALBUM_ART_PATH" ] && rm -f "$ALBUM_ART_PATH"
 fi
-

@@ -53,17 +53,20 @@ ALBUM_RAW=""
 # Try both short and full metadata field names for better compatibility
 # After restart, metadata might not be available immediately, but waybar will keep polling
 for i in {1..3}; do
-    # If playerctl doesn't see Spotify yet, check again (it might have appeared)
+    # If playerctl doesn't see Spotify yet, check again (it might have appeared since we last checked)
     if [ "$PLAYERCTL_SEES_SPOTIFY" = false ]; then
         if playerctl -l 2>/dev/null | grep -q "$PLAYER"; then
             PLAYERCTL_SEES_SPOTIFY=true
         else
-            # If still not detected, return empty quickly - waybar will poll again in 1 second
-            # This is faster than waiting here
-            if [ $i -eq 1 ]; then
+            # If still not detected after all our attempts, return empty and let waybar keep polling
+            # Don't exit on first iteration - give it a chance to appear
+            if [ $i -eq 3 ]; then
                 echo '{"text":"","tooltip":""}'
                 exit 0
             fi
+            # Wait a bit before next attempt
+            sleep 0.2
+            continue
         fi
     fi
     

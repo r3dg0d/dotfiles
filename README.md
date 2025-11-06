@@ -103,6 +103,8 @@ hyprctl reload
 - **Clock**: 12-hour format with seconds and calendar tooltip
 - **Modules**: System info, workspaces, and custom scripts
 
+**Note**: After modifying waybar config (`config.jsonc`) or scripts, you need to restart waybar for changes to take effect. CSS changes are auto-reloaded, but config changes require a manual restart.
+
 ### Ghostty
 
 - **Font**: CaskaydiaCove Nerd Font at size 10
@@ -140,6 +142,11 @@ Main keybindings are in `~/.config/hypr/bindings.conf`. Edit to customize.
 ### Waybar not showing Spotify
 - Ensure `playerctl` is installed: `sudo pacman -S playerctl`
 - Check if Spotify is running: `playerctl status`
+- **After modifying waybar config or scripts, restart waybar:**
+  ```bash
+  killall waybar && nohup waybar > /dev/null 2>&1 &
+  ```
+  Or simply: `killall waybar` (it will auto-restart if managed by your window manager)
 
 ### Cava visualizer not working
 - Install cava: `sudo pacman -S cava`

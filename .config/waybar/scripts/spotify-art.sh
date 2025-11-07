@@ -18,12 +18,22 @@ if [ -z "$ACCESS_TOKEN" ]; then
     exit 0
 fi
 
-# Get currently playing track from Spotify API
-API_RESPONSE=$(curl -s -X GET "https://api.spotify.com/v1/me/player/currently-playing" \
+# Get currently playing track from Spotify API (with timeout to prevent freezing)
+API_RESPONSE=$(curl -s --max-time 2 --connect-timeout 1 -X GET "https://api.spotify.com/v1/me/player/currently-playing" \
     -H "Authorization: Bearer $ACCESS_TOKEN" 2>/dev/null)
+CURL_EXIT=$?
 
-# Check if we got a valid response
-if [ -z "$API_RESPONSE" ] || echo "$API_RESPONSE" | jq -e '.error' >/dev/null 2>&1; then
+# Check if curl failed or returned empty (timeout or network error)
+if [ $CURL_EXIT -ne 0 ] || [ -z "$API_RESPONSE" ]; then
+    # Keep existing art if present
+    if [ -f "$ALBUM_ART_PATH" ]; then
+        echo "$ALBUM_ART_PATH"
+    fi
+    exit 0
+fi
+
+# Check if we got a valid response (with timeout on jq to prevent freezing)
+if echo "$API_RESPONSE" | timeout 0.5 jq -e '.error' >/dev/null 2>&1; then
     # No track playing or error - keep existing art if present
     if [ -f "$ALBUM_ART_PATH" ]; then
         echo "$ALBUM_ART_PATH"
@@ -32,21 +42,21 @@ if [ -z "$API_RESPONSE" ] || echo "$API_RESPONSE" | jq -e '.error' >/dev/null 2>
 fi
 
 # Check if response indicates no track playing
-if echo "$API_RESPONSE" | jq -e '.item == null' >/dev/null 2>&1; then
+if echo "$API_RESPONSE" | timeout 0.5 jq -e '.item == null' >/dev/null 2>&1; then
     if [ -f "$ALBUM_ART_PATH" ]; then
         echo "$ALBUM_ART_PATH"
     fi
     exit 0
 fi
 
-# Extract album art URL (use the largest available image)
-ALBUM_ART_URL=$(echo "$API_RESPONSE" | jq -r '.item.album.images[0].url // .item.album.images[1].url // .item.album.images[2].url // ""' 2>/dev/null)
+# Extract album art URL (use the largest available image, with timeout to prevent freezing)
+ALBUM_ART_URL=$(echo "$API_RESPONSE" | timeout 0.5 jq -r '.item.album.images[0].url // .item.album.images[1].url // .item.album.images[2].url // ""' 2>/dev/null || echo "")
 
 # Download album art if URL exists
 if [ -n "$ALBUM_ART_URL" ] && [ "$ALBUM_ART_URL" != "null" ]; then
     # Check if we need to update (download if file doesn't exist or is older than 10 seconds)
     if [ ! -f "$ALBUM_ART_PATH" ] || [ "$(stat -c %Y "$ALBUM_ART_PATH" 2>/dev/null || echo 0)" -lt $(($(date +%s) - 10)) ]; then
-        curl -s -L "$ALBUM_ART_URL" -o "$ALBUM_ART_PATH" 2>/dev/null
+        curl -s --max-time 3 --connect-timeout 1 -L "$ALBUM_ART_URL" -o "$ALBUM_ART_PATH" 2>/dev/null
     fi
     
     # Output path if file exists and is valid

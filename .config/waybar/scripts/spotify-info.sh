@@ -71,12 +71,20 @@ if [ -z "$ACCESS_TOKEN" ]; then
     exit 0
 fi
 
-# Get currently playing track from Spotify API
-API_RESPONSE=$(curl -s -X GET "https://api.spotify.com/v1/me/player/currently-playing" \
+# Get currently playing track from Spotify API (with timeout to prevent freezing)
+API_RESPONSE=$(curl -s --max-time 2 --connect-timeout 1 -X GET "https://api.spotify.com/v1/me/player/currently-playing" \
     -H "Authorization: Bearer $ACCESS_TOKEN" 2>/dev/null)
+CURL_EXIT=$?
 
-# Check if we got a valid response
-if [ -z "$API_RESPONSE" ] || echo "$API_RESPONSE" | jq -e '.error' >/dev/null 2>&1; then
+# Check if curl failed or returned empty (timeout or network error)
+if [ $CURL_EXIT -ne 0 ] || [ -z "$API_RESPONSE" ]; then
+    trap - EXIT ERR
+    output_json "" "No track playing" "" "" "" "" "" ""
+    exit 0
+fi
+
+# Check if we got a valid response (with timeout on jq to prevent freezing)
+if echo "$API_RESPONSE" | timeout 0.5 jq -e '.error' >/dev/null 2>&1; then
     # No track playing or error - return empty but valid JSON
     trap - EXIT ERR
     output_json "" "No track playing" "" "" "" "" "" ""
@@ -84,17 +92,17 @@ if [ -z "$API_RESPONSE" ] || echo "$API_RESPONSE" | jq -e '.error' >/dev/null 2>
 fi
 
 # Check if response indicates no track playing
-if echo "$API_RESPONSE" | jq -e '.item == null' >/dev/null 2>&1; then
+if echo "$API_RESPONSE" | timeout 0.5 jq -e '.item == null' >/dev/null 2>&1; then
     trap - EXIT ERR
     output_json "" "No track playing" "" "" "" "" "" ""
     exit 0
 fi
 
-# Extract track information
-TITLE_RAW=$(echo "$API_RESPONSE" | jq -r '.item.name // ""' 2>/dev/null)
-ARTIST_RAW=$(echo "$API_RESPONSE" | jq -r '.item.artists[0].name // ""' 2>/dev/null)
-ALBUM_RAW=$(echo "$API_RESPONSE" | jq -r '.item.album.name // ""' 2>/dev/null)
-IS_PLAYING=$(echo "$API_RESPONSE" | jq -r '.is_playing // false' 2>/dev/null)
+# Extract track information (with timeout on jq to prevent freezing)
+TITLE_RAW=$(echo "$API_RESPONSE" | timeout 0.5 jq -r '.item.name // ""' 2>/dev/null || echo "")
+ARTIST_RAW=$(echo "$API_RESPONSE" | timeout 0.5 jq -r '.item.artists[0].name // ""' 2>/dev/null || echo "")
+ALBUM_RAW=$(echo "$API_RESPONSE" | timeout 0.5 jq -r '.item.album.name // ""' 2>/dev/null || echo "")
+IS_PLAYING=$(echo "$API_RESPONSE" | timeout 0.5 jq -r '.is_playing // false' 2>/dev/null || echo "false")
 
 # Determine status
 if [ "$IS_PLAYING" = "true" ]; then

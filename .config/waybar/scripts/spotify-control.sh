@@ -6,14 +6,14 @@
 PLAYER="spotify"
 ACTION="$1"
 
-# Check if Spotify is running
-if ! playerctl -l 2>/dev/null | grep -q "$PLAYER"; then
+# Check if Spotify is running (with timeout to prevent freezing)
+if ! timeout 0.5 playerctl -l 2>/dev/null | grep -q "$PLAYER"; then
     echo ""
     exit 0
 fi
 
-# Get status
-STATUS=$(playerctl -p "$PLAYER" status 2>/dev/null)
+# Get status (with timeout to prevent freezing)
+STATUS=$(timeout 0.5 playerctl -p "$PLAYER" status 2>/dev/null)
 if [ "$STATUS" != "Playing" ] && [ "$STATUS" != "Paused" ]; then
     echo ""
     exit 0
@@ -31,7 +31,7 @@ case "$ACTION" in
     "loop")
         # Show loop icon based on loop status
         # Note: playerctl status is shifted - we need to map it correctly to match Spotify UI
-        LOOP_STATUS=$(playerctl -p "$PLAYER" loop 2>/dev/null || echo "None")
+        LOOP_STATUS=$(timeout 0.5 playerctl -p "$PLAYER" loop 2>/dev/null || echo "None")
         case "$LOOP_STATUS" in
             "None")
                 echo "󰑗"  # Shows as normal loop in Spotify (Playlist)
@@ -49,7 +49,7 @@ case "$ACTION" in
         ;;
     "shuffle")
         # Show shuffle icon based on shuffle status
-        SHUFFLE_STATUS=$(playerctl -p "$PLAYER" shuffle 2>/dev/null || echo "Off")
+        SHUFFLE_STATUS=$(timeout 0.5 playerctl -p "$PLAYER" shuffle 2>/dev/null || echo "Off")
         if [ "$SHUFFLE_STATUS" = "On" ]; then
             echo "󰒝"  # Shuffle on
         else

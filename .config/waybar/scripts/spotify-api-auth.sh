@@ -34,9 +34,9 @@ if [ -f "$TOKEN_FILE" ]; then
         fi
     fi
     
-    # Try to refresh token if we have refresh_token
+    # Try to refresh token if we have refresh_token (with timeout to prevent freezing)
     if [ -n "$REFRESH_TOKEN" ] && [ "$REFRESH_TOKEN" != "null" ]; then
-        RESPONSE=$(curl -s -X POST "https://accounts.spotify.com/api/token" \
+        RESPONSE=$(curl -s --max-time 3 --connect-timeout 1 -X POST "https://accounts.spotify.com/api/token" \
             -H "Content-Type: application/x-www-form-urlencoded" \
             -d "grant_type=refresh_token" \
             -d "refresh_token=$REFRESH_TOKEN" \

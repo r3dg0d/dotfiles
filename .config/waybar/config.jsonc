@@ -26,7 +26,7 @@
     "bluetooth",
     "network",
     "group/audio",
-
+    "custom/arch-rp",
     "cpu",
     "battery"
   ],
@@ -79,13 +79,8 @@
     "format": "{:L%A %I:%M:%S %p}",
     "format-alt": "{:L%d %B %Y}",
     "interval": 1,
-    "tooltip-format": "<big>{:L%B %Y}</big>\n<tt><small>{calendar}</small></tt>",
-    "calendar": {
-      "format": {
-        "months": "",
-        "today": "<span color='#6366f1'><b><u>{}</u></b></span>"
-      }
-    },
+    "tooltip": false,
+    "on-click": "true",
     "on-click-right": "omarchy-launch-floating-terminal-with-presentation omarchy-tz-select"
   },
   "custom/cava": {
@@ -229,6 +224,14 @@
     "exec": "$OMARCHY_PATH/default/waybar/indicators/screen-recording.sh",
     "signal": 8,
     "return-type": "json"
+  },
+  "custom/arch-rp": {
+    "format": "{}",
+    "exec": "~/Documents/arch-rich-presence/waybar-status.sh",
+    "return-type": "json",
+    "interval": 5,
+    "on-click": "~/Documents/arch-rich-presence/toggle.sh",
+    "tooltip": true
   },
   "tray": {
     "icon-size": 12,

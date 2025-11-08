@@ -32,6 +32,31 @@ if [ $CURL_EXIT -ne 0 ] || [ -z "$API_RESPONSE" ]; then
     exit 0
 fi
 
+# Check for rate limiting or non-JSON responses (like "Too many requests")
+if echo "$API_RESPONSE" | timeout 0.5 jq . >/dev/null 2>&1; then
+    # Valid JSON - continue processing
+    :
+else
+    # Not valid JSON (likely rate limiting or error message) - try playerctl as fallback
+    ALBUM_ART_URL=$(playerctl -p spotify metadata mpris:artUrl 2>/dev/null || echo "")
+    if [ -n "$ALBUM_ART_URL" ] && [ "$ALBUM_ART_URL" != "" ]; then
+        # Download album art if file doesn't exist or is older than 10 seconds
+        if [ ! -f "$ALBUM_ART_PATH" ] || [ "$(stat -c %Y "$ALBUM_ART_PATH" 2>/dev/null || echo 0)" -lt $(($(date +%s) - 10)) ]; then
+            curl -s --max-time 3 --connect-timeout 1 -L "$ALBUM_ART_URL" -o "$ALBUM_ART_PATH" 2>/dev/null
+        fi
+        # Output path if file exists and is valid
+        if [ -f "$ALBUM_ART_PATH" ] && [ -s "$ALBUM_ART_PATH" ]; then
+            echo "$ALBUM_ART_PATH"
+        fi
+    else
+        # Keep existing art if present
+        if [ -f "$ALBUM_ART_PATH" ]; then
+            echo "$ALBUM_ART_PATH"
+        fi
+    fi
+    exit 0
+fi
+
 # Check if we got a valid response (with timeout on jq to prevent freezing)
 if echo "$API_RESPONSE" | timeout 0.5 jq -e '.error' >/dev/null 2>&1; then
     # No track playing or error - keep existing art if present
@@ -64,6 +89,11 @@ if [ -n "$ALBUM_ART_URL" ] && [ "$ALBUM_ART_URL" != "null" ]; then
         echo "$ALBUM_ART_PATH"
     fi
 else
-    # No album art URL - remove old art if present
-    [ -f "$ALBUM_ART_PATH" ] && rm -f "$ALBUM_ART_PATH"
+    # No album art URL - keep existing art if present (don't remove it)
+    if [ -f "$ALBUM_ART_PATH" ]; then
+        echo "$ALBUM_ART_PATH"
+    fi
 fi
+
+# Always exit cleanly
+exit 0

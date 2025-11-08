@@ -83,6 +83,64 @@ if [ $CURL_EXIT -ne 0 ] || [ -z "$API_RESPONSE" ]; then
     exit 0
 fi
 
+# Check for rate limiting or non-JSON responses (like "Too many requests")
+if ! echo "$API_RESPONSE" | timeout 0.5 jq . >/dev/null 2>&1; then
+    # Not valid JSON (likely rate limiting or error message) - try playerctl as fallback
+    PLAYER_STATUS=$(playerctl -p spotify status 2>/dev/null || echo "")
+    if [ -n "$PLAYER_STATUS" ] && [ "$PLAYER_STATUS" != "No players found" ]; then
+        # Get track info from playerctl
+        TITLE_RAW=$(playerctl -p spotify metadata xesam:title 2>/dev/null || echo "")
+        ARTIST_RAW=$(playerctl -p spotify metadata xesam:artist 2>/dev/null || echo "")
+        ALBUM_RAW=$(playerctl -p spotify metadata xesam:album 2>/dev/null || echo "")
+        
+        if [ "$PLAYER_STATUS" = "Playing" ]; then
+            STATUS="Playing"
+            ICON="󰏤"
+        else
+            STATUS="Paused"
+            ICON="󰐊"
+        fi
+        
+        # Escape for JSON
+        ARTIST=$(json_escape "$ARTIST_RAW")
+        TITLE=$(json_escape "$TITLE_RAW")
+        ALBUM=$(json_escape "$ALBUM_RAW")
+        
+        # Create display text
+        if [ -n "$ARTIST" ] && [ -n "$TITLE" ]; then
+            TEXT="${ARTIST} - ${TITLE}"
+        elif [ -n "$TITLE" ]; then
+            TEXT="${TITLE}"
+        elif [ -n "$ARTIST" ]; then
+            TEXT="${ARTIST}"
+        else
+            TEXT=""
+        fi
+        
+        # Truncate if too long
+        TEXT_DISPLAY="$TEXT"
+        if [ ${#TEXT_DISPLAY} -gt 40 ]; then
+            TEXT_DISPLAY="${TEXT_DISPLAY:0:37}..."
+        fi
+        
+        # Build tooltip
+        if [ -n "$ARTIST" ] || [ -n "$TITLE" ]; then
+            TOOLTIP="${ARTIST} - ${TITLE}\\nAlbum: ${ALBUM}\\nStatus: ${STATUS}\\n\\nClick: Play/Pause\\nRight-click: Next\\nMiddle-click: Previous"
+        else
+            TOOLTIP="Waiting for Spotify..."
+        fi
+        
+        trap - EXIT ERR
+        output_json "${ICON} ${TEXT_DISPLAY}" "$TOOLTIP" "$ICON" "$ARTIST_RAW" "$TITLE_RAW" "$ALBUM_RAW" "$STATUS" "custom-spotify-info"
+        exit 0
+    else
+        # No player or stopped - return waiting message
+        trap - EXIT ERR
+        output_json "󰐊 " "Waiting for Spotify... (rate limited)" "󰐊" "" "" "" "Paused" "custom-spotify-info"
+        exit 0
+    fi
+fi
+
 # Check if we got a valid response (with timeout on jq to prevent freezing)
 if echo "$API_RESPONSE" | timeout 0.5 jq -e '.error' >/dev/null 2>&1; then
     # No track playing or error - return empty but valid JSON

@@ -43,7 +43,8 @@
 #pulseaudio,
 #custom-omarchy,
 #custom-screenrecording-indicator,
-#custom-update {
+#custom-update,
+#custom-arch-rp {
   min-width: 12px;
   margin: 0 7.5px;
 }
@@ -167,4 +168,16 @@ window#waybar {
   margin: 0;
   padding: 0;
   min-width: 0;
+}
+
+#custom-arch-rp.enabled {
+  color: #4ade80;
+}
+
+#custom-arch-rp.disabled {
+  color: #ef4444;
+}
+
+#custom-arch-rp.stopped {
+  color: #6b7280;
 }

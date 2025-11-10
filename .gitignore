@@ -1,23 +1,12 @@
-# Backup files
-*.backup
-*.bak
-*.old
-*.orig
-*~
+# Ignore sensitive files
+**/spotify_token.json
+**/viewed_ips.json
+**/views.json
+**/*.bak
+**/*.backup
+**/*.swp
+**/*.swo
+**/*~
 
-# System files
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-
-# Temporary files
-*.tmp
-*.temp
-
-# EWW state (if using EWW)
-eww-state.yml
-
-# Waybar cache
-waybar-cache/
+# Ignore omarchy default files (these are managed by omarchy)
+# Only track custom configs in ~/.config/

@@ -92,7 +92,7 @@ else
     # No album art URL - keep existing art if present (don't remove it)
     if [ -f "$ALBUM_ART_PATH" ]; then
         echo "$ALBUM_ART_PATH"
-    fi
+fi
 fi
 
 # Always exit cleanly

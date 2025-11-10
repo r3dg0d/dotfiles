@@ -28,3 +28,5 @@ case "$CURRENT_LOOP" in
         ;;
 esac
 
+# Send signal to waybar to update modules
+pkill -SIGRTMIN+8 waybar

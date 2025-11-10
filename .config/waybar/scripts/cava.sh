@@ -44,8 +44,9 @@ EOF
 
 # Run cava with the temp config. It emits ascii digits 0..7 per frame.
 # We map those digits to Unicode bar glyphs and print a single horizontal string.
+# Use timeout to prevent hanging and only read one line
 
-"$CAVA_BIN" -p "$CONFIG_FILE" | while IFS= read -r line || [ -n "$line" ]; do
+timeout 0.2 "$CAVA_BIN" -p "$CONFIG_FILE" 2>/dev/null | head -n 1 | while IFS= read -r line || [ -n "$line" ]; do
     # Remove semicolons and spaces, then map each character
     line="${line//;/}"
     line="${line// /}"
@@ -60,4 +61,5 @@ EOF
         fi
     done
     printf "%s\n" "$out"
+    break  # Only process first line
 done

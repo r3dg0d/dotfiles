@@ -19,3 +19,5 @@ else
     playerctl -p "$PLAYER" shuffle On
 fi
 
+# Send signal to waybar to update modules
+pkill -SIGRTMIN+8 waybar

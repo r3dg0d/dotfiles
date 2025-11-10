@@ -58,7 +58,7 @@
   "custom/omarchy": {
     "format": "<span font='omarchy'>\ue900</span>",
     "on-click": "omarchy-menu",
-    "on-click-right": "omarchy-launch-terminal",
+    "on-click-right": "xdg-terminal-exec",
     "tooltip-format": "Menu\n\nTerminal"
   },
   "custom/update": {
@@ -73,7 +73,7 @@
   "cpu": {
     "interval": 5,
     "format": "󰍛",
-    "on-click": "$TERMINAL -e btop"
+    "on-click": "ghostty -e btop"
   },
   "clock": {
     "format": "{:L%A %I:%M:%S %p}",
@@ -85,56 +85,61 @@
   },
   "custom/cava": {
     "format": "{}",
-    "exec": "~/.config/waybar/scripts/cava.sh || echo \"\"",
+    "exec": "~/.config/waybar/scripts/cava.sh 2>/dev/null || echo \"\"",
     "return-type": "text",
-    "tooltip": false
+    "tooltip": false,
+    "interval": 2
   },
   "image#spotify-art": {
     "exec": "/home/r3dg0d/.config/waybar/scripts/spotify-art.sh",
     "size": 32,
-    "interval": 2,
-    "on-click": "playerctl -p spotify play-pause",
-    "on-click-right": "playerctl -p spotify next",
-    "on-click-middle": "playerctl -p spotify previous",
-    "on-scroll-up": "playerctl -p spotify next",
-    "on-scroll-down": "playerctl -p spotify previous",
+    "interval": 5,
+    "on-click": "playerctl -p spotify play-pause && pkill -SIGRTMIN+8 waybar",
+    "on-click-right": "playerctl -p spotify next && pkill -SIGRTMIN+8 waybar",
+    "on-click-middle": "playerctl -p spotify previous && pkill -SIGRTMIN+8 waybar",
+    "on-scroll-up": "playerctl -p spotify next && pkill -SIGRTMIN+8 waybar",
+    "on-scroll-down": "playerctl -p spotify previous && pkill -SIGRTMIN+8 waybar",
     "on-click-backward": "~/.config/waybar/scripts/spotify-loop.sh"
   },
   "custom/spotify-info": {
     "exec": "/home/r3dg0d/.config/waybar/scripts/spotify-info.sh",
     "return-type": "json",
-    "interval": 1,
+    "interval": 3,
     "exec-on-event": true,
     "signal": 8,
-    "on-click": "playerctl -p spotify play-pause",
-    "on-click-right": "playerctl -p spotify next",
-    "on-click-middle": "playerctl -p spotify previous"
+    "on-click": "playerctl -p spotify play-pause && pkill -SIGRTMIN+8 waybar",
+    "on-click-right": "playerctl -p spotify next && pkill -SIGRTMIN+8 waybar",
+    "on-click-middle": "playerctl -p spotify previous && pkill -SIGRTMIN+8 waybar"
   },
   "custom/spotify-prev": {
     "exec": "~/.config/waybar/scripts/spotify-control.sh prev",
     "format": "󰒮",
-    "interval": 1,
-    "on-click": "playerctl -p spotify previous",
+    "interval": 2,
+    "on-click": "playerctl -p spotify previous && pkill -SIGRTMIN+8 waybar",
     "tooltip": "Previous track"
   },
   "custom/spotify-next": {
     "exec": "~/.config/waybar/scripts/spotify-control.sh next",
     "format": "󰒭",
-    "interval": 1,
-    "on-click": "playerctl -p spotify next",
+    "interval": 2,
+    "on-click": "playerctl -p spotify next && pkill -SIGRTMIN+8 waybar",
     "tooltip": "Next track"
   },
   "custom/spotify-shuffle": {
     "exec": "~/.config/waybar/scripts/spotify-control.sh shuffle",
     "format": "{}",
-    "interval": 1,
+    "interval": 2,
+    "exec-on-event": true,
+    "signal": 8,
     "on-click": "~/.config/waybar/scripts/spotify-shuffle.sh",
     "tooltip": "Toggle shuffle"
   },
   "custom/spotify-loop": {
     "exec": "~/.config/waybar/scripts/spotify-control.sh loop",
     "format": "{}",
-    "interval": 1,
+    "interval": 2,
+    "exec-on-event": true,
+    "signal": 8,
     "on-click": "~/.config/waybar/scripts/spotify-loop.sh",
     "tooltip": "Toggle loop"
   },
@@ -179,7 +184,7 @@
   },
   "pulseaudio": {
     "format": "{icon}",
-    "on-click": "$TERMINAL --class=Wiremix -e wiremix",
+    "on-click": "ghostty --class=Wiremix -e wiremix",
     // "on-click": "group:expand/audio",
     "on-click-right": "pamixer -t",
     "tooltip-format": "{volume}%",
@@ -188,7 +193,9 @@
     "headphone-icon": "",
     "format-icons": {
       "default": ["", "", ""]
-    }
+    },
+    "on-scroll-up": "pamixer -i 5",
+    "on-scroll-down": "pamixer -d 5"
   },
   "group/audio": {
     "orientation": "horizontal",
@@ -200,9 +207,9 @@
   },
   "custom/volume-slider": {
     "exec": "pamixer --get-volume",
-    "exec-on-event": false,
-    "return-type": "",
-    "interval": 1,
+    "exec-on-event": true,
+    "return-type": "json",
+    "interval": 2,
     "format": "{}",
     "on-scroll-down": "pamixer -i 5",
     "on-scroll-up": "pamixer -d 5"

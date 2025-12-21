@@ -15,7 +15,7 @@ echo "📦 Creating backup of existing configs..."
 mkdir -p "$BACKUP_DIR"
 
 # Backup existing configs if they exist
-for dir in hypr waybar ghostty fastfetch eww; do
+for dir in hypr noctalia fastfetch; do
     if [ -d "$CONFIG_DIR/$dir" ]; then
         echo "  Backing up $dir..."
         cp -r "$CONFIG_DIR/$dir" "$BACKUP_DIR/" 2>/dev/null || true
@@ -26,7 +26,7 @@ echo ""
 echo "📋 Installing dotfiles..."
 
 # Copy configs
-for dir in hypr waybar ghostty fastfetch eww; do
+for dir in hypr noctalia fastfetch; do
     if [ -d "$DOTFILES_DIR/.config/$dir" ]; then
         echo "  Installing $dir..."
         mkdir -p "$CONFIG_DIR"
@@ -37,16 +37,17 @@ done
 # Make scripts executable
 echo ""
 echo "🔧 Making scripts executable..."
-find "$CONFIG_DIR/waybar/scripts" -name "*.sh" -type f -exec chmod +x {} \; 2>/dev/null || true
 find "$CONFIG_DIR/hypr" -name "*.sh" -type f -exec chmod +x {} \; 2>/dev/null || true
 
 echo ""
 echo "✅ Installation complete!"
 echo ""
 echo "📝 Next steps:"
-echo "  1. Update monitor configuration in ~/.config/hypr/monitors.conf"
+echo "  1. Update monitor configuration in ~/.config/hypr/hyprland.conf"
 echo "  2. Install required packages:"
-echo "     sudo pacman -S hyprland waybar ghostty fastfetch playerctl cava jq"
+echo "     sudo pacman -S hyprland noctalia-shell fastfetch"
+echo "     # Or use AUR helper:"
+echo "     yay -S noctalia-shell"
 echo "  3. Reload Hyprland: hyprctl reload"
 echo ""
 echo "💾 Your old configs are backed up to: $BACKUP_DIR"

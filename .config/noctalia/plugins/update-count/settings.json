@@ -1,0 +1,11 @@
+{
+  "updateInterval": 300000,
+  "configuredTerminal": "ghostty -e",
+  "configuredIcon": "world-download",
+  "hideOnZero": false,
+  "updateIntervalMinutes": 30,
+  "updateTerminalCommand": "ghostty -e",
+  "currentIconName": "world-download",
+  "customCmdGetNumUpdates": "",
+  "customCmdDoSystemUpdate": ""
+}

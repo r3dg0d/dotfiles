@@ -1,14 +1,12 @@
 # My Dotfiles
 
-A collection of my dotfiles for a riced Linux desktop environment using Hyprland, Waybar, Ghostty, and Fastfetch.
+A collection of my dotfiles for a riced Linux desktop environment using Hyprland, Noctalia Shell, and Fastfetch.
 
 ## What's Included
 
 - **Hyprland** - Window manager configuration
-- **Waybar** - Status bar with Spotify integration and cava visualizer
-- **Ghostty** - Terminal configuration
-- **Fastfetch** - System information display
-- **EWW** - (Optional) Extended Widget Works configuration
+- **Noctalia Shell** - Modern shell/bar replacement with panels, widgets, and desktop integration
+- **Fastfetch** - System information display with custom OS installation date and age modules
 
 ## Screenshots
 
@@ -18,19 +16,17 @@ A collection of my dotfiles for a riced Linux desktop environment using Hyprland
 
 ### Prerequisites
 
-- Arch Linux (or Arch-based distribution)
+- Arch Linux
 - Hyprland window manager
-- Waybar
-- Ghostty terminal
+- Noctalia Shell (from AUR)
 - Fastfetch
-- Required fonts: CaskaydiaCove Nerd Font
-- Optional: EWW (for widgets), cava (for audio visualizer)
+- Required fonts: Nerd Fonts (for icons)
 
 ### Quick Install
 
 1. Clone this repository:
 ```bash
-git clone https://github.com/YOUR_USERNAME/dotfiles.git ~/dotfiles
+git clone https://github.com/r3dg0d/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 ```
 
@@ -40,7 +36,14 @@ chmod +x install.sh
 ./install.sh
 ```
 
-3. Reload Hyprland:
+3. Install Noctalia Shell (if not already installed):
+```bash
+yay -S noctalia-shell
+# or
+paru -S noctalia-shell
+```
+
+4. Reload Hyprland:
 ```bash
 hyprctl reload
 ```
@@ -53,34 +56,25 @@ If you prefer to install manually:
 ```bash
 mkdir -p ~/.config-backup
 cp -r ~/.config/hypr ~/.config-backup/ 2>/dev/null
-cp -r ~/.config/waybar ~/.config-backup/ 2>/dev/null
-cp -r ~/.config/ghostty ~/.config-backup/ 2>/dev/null
+cp -r ~/.config/noctalia ~/.config-backup/ 2>/dev/null
 cp -r ~/.config/fastfetch ~/.config-backup/ 2>/dev/null
 ```
 
 2. Copy the dotfiles:
 ```bash
 cp -r .config/hypr ~/.config/
-cp -r .config/waybar ~/.config/
-cp -r .config/ghostty ~/.config/
+cp -r .config/noctalia ~/.config/
 cp -r .config/fastfetch ~/.config/
 ```
 
-3. Make scripts executable:
-```bash
-chmod +x ~/.config/waybar/scripts/*.sh
-```
-
-4. Install dependencies:
+3. Install dependencies:
 ```bash
 # Required packages
-sudo pacman -S hyprland waybar ghostty fastfetch
-
-# Optional packages
-sudo pacman -S cava jq curl python  # For Waybar Spotify and visualizer
+sudo pacman -S hyprland fastfetch
+yay -S noctalia-shell  # or paru -S noctalia-shell
 ```
 
-5. Reload Hyprland:
+4. Reload Hyprland:
 ```bash
 hyprctl reload
 ```
@@ -89,126 +83,77 @@ hyprctl reload
 
 ### Hyprland
 
-- **Monitors**: Configured for dual monitor setup (1920x1080@144Hz + 3440x1440@180Hz)
+- **Monitors**: Configured for dual monitor setup
 - **Keybindings**: Custom keybindings for applications and window management
 - **Input**: Keyboard and mouse configuration
 - **Appearance**: Window rules and visual settings
 
-**Important**: Update `monitors.conf` to match your monitor setup!
+**Important**: Update monitor configuration in `hyprland.conf` to match your monitor setup!
 
-### Waybar
+### Noctalia Shell
 
-- **Spotify Integration**: Album art, track info, and playback controls
-- **Cava Visualizer**: Audio visualizer in the status bar
-- **Clock**: 12-hour format with seconds and calendar tooltip
-- **Modules**: System info, workspaces, and custom scripts
+- **Panels**: Customizable panels with transparency and animations
+- **Widgets**: System monitoring, workspace management, media controls
+- **Desktop Widgets**: Multi-monitor support with positioning and scaling
+- **Plugin System**: Support for git forges and custom plugins
+- **Settings**: Comprehensive configuration UI
 
-**Note**: After modifying waybar config (`config.jsonc`) or scripts, you need to restart waybar for changes to take effect. CSS changes are auto-reloaded, but config changes require a manual restart.
-
-### Ghostty
-
-- **Font**: CaskaydiaCove Nerd Font at size 10
-- **Window**: No decorations, padding 14x14
-- **Keybindings**: Copy/paste with Shift+Insert and Ctrl+Insert
+Noctalia Shell replaces traditional status bars (like Waybar) with a more modern, integrated approach. Configuration is done through the Noctalia settings panel or by editing the config files directly.
 
 ### Fastfetch
 
-- **Custom Modules**: OS installation date, OS age, monitor information
-- **Display**: Shows monitor models, resolutions, and refresh rates
+- **Custom Modules**: 
+  - OS Installation Date (from pacman.log)
+  - OS Age (calculated from installation date)
+- **Hyprland Preset**: Uses the Hyprland preset with custom modifications
+- **Display**: Shows system information with consistent styling
+
+The Fastfetch config includes custom command modules that calculate the actual OS installation date from `/var/log/pacman.log` and display the age of the installation.
 
 ## Customization
 
 ### Monitor Configuration
 
-Edit `~/.config/hypr/monitors.conf` to match your setup:
+Edit `~/.config/hypr/hyprland.conf` to match your setup. Look for monitor configuration lines like:
 
 ```bash
 monitor=DP-1,1920x1080@143.85,0x0,1
 monitor=HDMI-A-1,3440x1440@179.99,1920x0,1
 ```
 
-### Waybar Spotify
+### Noctalia Shell Configuration
 
-The Spotify integration uses the Spotify Web API to display track information and album art. It requires:
-
-1. **Spotify Developer Account Setup:**
-   - Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
-   - Click "Create an App"
-   - Fill in the app details (name, description)
-   - **Important:** Add `http://localhost:8888/callback` to the "Redirect URIs" list
-   - Copy your **Client ID** and **Client Secret**
-
-2. **Configure Credentials:**
-   - Edit `~/.config/mufetch/config.yaml` (create it if it doesn't exist):
-     ```yaml
-     spotify_client_id: YOUR_CLIENT_ID_HERE
-     spotify_client_secret: YOUR_CLIENT_SECRET_HERE
-     ```
-
-3. **Complete OAuth Authentication:**
-   - Run the OAuth script to authenticate:
-     ```bash
-     ~/.config/waybar/scripts/spotify-oauth.sh
-     ```
-   - This will:
-     - Open your browser for Spotify authorization
-     - Complete the OAuth flow automatically
-     - Save tokens to `~/.config/waybar/spotify_token.json`
-   - **Note:** You only need to do this once. Tokens will auto-refresh when needed.
-
-4. **Required Packages:**
-   ```bash
-   sudo pacman -S jq curl python
-   ```
-
-5. **Features:**
-   - Displays current track name and artist
-   - Shows album art
-   - Playback controls (play/pause, next, previous)
-   - Works automatically after reboot (no manual waybar restart needed)
-   - Uses Spotify API directly (no dependency on DBus/playerctl)
-
-**Troubleshooting:**
-- If track info doesn't appear after reboot, ensure the OAuth flow was completed
-- Check that `~/.config/waybar/spotify_token.json` exists
-- Verify your redirect URI matches exactly: `http://localhost:8888/callback`
-- Run `~/.config/waybar/scripts/spotify-info.sh` manually to test
+Noctalia Shell can be configured through:
+1. **Settings Panel**: Access via the Noctalia settings application
+2. **Config Files**: Edit files in `~/.config/noctalia/` directly
+3. **Plugins**: Install and configure plugins through the settings panel
 
 ### Keybindings
 
-Main keybindings are in `~/.config/hypr/bindings.conf`. Edit to customize.
+Main keybindings are in `~/.config/hypr/hyprland.conf`. Edit to customize.
 
 ## Troubleshooting
 
-### Waybar not showing Spotify
-- **For Spotify API integration (recommended):**
-  - Ensure OAuth flow is completed: `~/.config/waybar/scripts/spotify-oauth.sh`
-  - Check that `~/.config/waybar/spotify_token.json` exists
-  - Verify credentials in `~/.config/mufetch/config.yaml`
-  - Test the script manually: `~/.config/waybar/scripts/spotify-info.sh`
-  - Ensure redirect URI `http://localhost:8888/callback` is added in Spotify Developer Dashboard
-  
-- **For legacy playerctl integration:**
-  - Ensure `playerctl` is installed: `sudo pacman -S playerctl`
-  - Check if Spotify is running: `playerctl status`
-  
-- **After modifying waybar config or scripts, restart waybar:**
-  ```bash
-  killall waybar && nohup waybar > /dev/null 2>&1 &
-  ```
-  Or simply: `killall waybar` (it will auto-restart if managed by your window manager)
-
-### Cava visualizer not working
-- Install cava: `sudo pacman -S cava`
-- Ensure PulseAudio is running
+### Noctalia Shell not appearing
+- Ensure Noctalia Shell is installed: `yay -S noctalia-shell`
+- Check if it's running: `ps aux | grep noctalia`
+- Restart Hyprland: `hyprctl reload`
 
 ### Monitor configuration issues
 - Check your monitor names: `hyprctl monitors`
-- Update `monitors.conf` with correct names and resolutions
+- Update `hyprland.conf` with correct names and resolutions
 
-### Ghostty not found
-- Install Ghostty: `yay -S ghostty` or from AUR
-- Or use your preferred terminal and update bindings
+### Fastfetch not showing correct installation date
+- Ensure `/var/log/pacman.log` exists and is readable
+- The installation date is calculated from the first entry in pacman.log
+
+## Migration Notes
+
+This setup was migrated from:
+- **Omarchy** → **Arch Linux** (standard installation)
+- **Waybar** → **Noctalia Shell** (modern shell replacement)
+
+The configuration has been updated to reflect these changes and remove dependencies on Waybar-specific features.
 
 ## License
 
@@ -217,8 +162,8 @@ This configuration is free to use and modify. Feel free to fork and adapt it to 
 ## Credits
 
 - Inspired by various ricing communities
-- Uses Omarchy dotfiles as a base
-- EWW widget inspired by pewdiepie's setup
+- Noctalia Shell: [noctalia-dev/noctalia-shell](https://github.com/noctalia-dev/noctalia-shell)
+- Fastfetch: [fastfetch-cli/fastfetch](https://github.com/fastfetch-cli/fastfetch)
 
 ## Contributing
 
@@ -227,4 +172,3 @@ Feel free to open issues or submit pull requests if you have improvements!
 ---
 
 **Note**: Remember to update monitor configurations, keyboard layouts, and any personal paths/commands before using this setup.
-

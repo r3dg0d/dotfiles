@@ -8,10 +8,6 @@ A collection of my dotfiles for a riced Linux desktop environment using Hyprland
 - **Noctalia Shell** - Modern shell/bar replacement with panels, widgets, and desktop integration
 - **Fastfetch** - System information display with custom OS installation date and age modules
 
-## Screenshots
-
-![My Desktop Setup](screenshot1.png)
-
 ## Installation
 
 ### Prerequisites

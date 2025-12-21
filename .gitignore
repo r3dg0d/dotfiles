@@ -7,6 +7,3 @@
 **/*.swp
 **/*.swo
 **/*~
-
-# Ignore omarchy default files (these are managed by omarchy)
-# Only track custom configs in ~/.config/

@@ -2,6 +2,10 @@
 
 A collection of my dotfiles for a riced Linux desktop environment using Hyprland, Noctalia Shell, and Fastfetch.
 
+## Screenshot
+
+![My Desktop Setup](screenshot.png)
+
 ## What's Included
 
 - **Hyprland** - Window manager configuration

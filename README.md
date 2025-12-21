@@ -145,11 +145,11 @@ Main keybindings are in `~/.config/hypr/hyprland.conf`. Edit to customize.
 
 ## Migration Notes
 
-This setup was migrated from:
-- **Omarchy** → **Arch Linux** (standard installation)
-- **Waybar** → **Noctalia Shell** (modern shell replacement)
+This setup uses:
+- **Arch Linux** (standard installation)
+- **Noctalia Shell** (modern shell replacement)
 
-The configuration has been updated to reflect these changes and remove dependencies on Waybar-specific features.
+The configuration has been updated to use Noctalia Shell instead of traditional status bars.
 
 ## License
 

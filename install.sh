@@ -44,7 +44,7 @@ echo ""
 echo "📦 Installing required packages..."
 if command -v pacman >/dev/null; then
     # Check if packages are installed, if not install them
-    PKGS="hyprland fastfetch nsxiv"
+    PKGS="hyprland fastfetch nsxiv imagemagick"
     MISSING_PKGS=""
     for pkg in $PKGS; do
         if ! pacman -Qi $pkg >/dev/null 2>&1; then
@@ -77,9 +77,11 @@ fi
 echo ""
 echo "🎨 Setting default applications..."
 if command -v xdg-mime >/dev/null; then
-    # Images -> nsxiv
-    echo "  Setting nsxiv as default image viewer..."
-    xdg-mime default nsxiv.desktop image/jpeg image/png image/gif image/webp image/bmp image/tiff
+    # Images -> nsxiv-smart (custom wrapper)
+    echo "  Setting nsxiv (smart) as default image viewer..."
+    # Ensure wrapper exists (copy from dotfiles if needed, or create)
+    # We assume the wrapper script is deployed via dotfiles or created manually
+    xdg-mime default nsxiv-smart.desktop image/jpeg image/png image/gif image/webp image/bmp image/tiff
     
     # File Manager -> dolphin (if installed)
     if pacman -Qi dolphin >/dev/null 2>&1; then

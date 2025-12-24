@@ -26,13 +26,44 @@ echo ""
 echo "📋 Installing dotfiles..."
 
 # Copy configs
-for dir in hypr noctalia fastfetch; do
+for dir in hypr noctalia fastfetch gtk-3.0 gtk-4.0; do
     if [ -d "$DOTFILES_DIR/.config/$dir" ]; then
         echo "  Installing $dir..."
         mkdir -p "$CONFIG_DIR"
         cp -r "$DOTFILES_DIR/.config/$dir" "$CONFIG_DIR/"
     fi
 done
+
+# Install nsxiv-smart wrapper script
+echo ""
+echo "🖼️ Installing nsxiv-smart image viewer wrapper..."
+if [ -f "$DOTFILES_DIR/.local/bin/nsxiv-smart" ]; then
+    mkdir -p "$HOME/.local/bin"
+    cp "$DOTFILES_DIR/.local/bin/nsxiv-smart" "$HOME/.local/bin/"
+    chmod +x "$HOME/.local/bin/nsxiv-smart"
+    echo "  ✓ Installed nsxiv-smart to ~/.local/bin/"
+else
+    echo "  ⚠️ nsxiv-smart not found in dotfiles"
+fi
+
+# Create nsxiv-smart.desktop entry
+echo "  Creating desktop entry..."
+mkdir -p "$HOME/.local/share/applications"
+cat > "$HOME/.local/share/applications/nsxiv-smart.desktop" << 'EOF'
+[Desktop Entry]
+Name=nsxiv (Smart Size)
+GenericName=Image Viewer
+Comment=Neo Simple X Image Viewer with auto-sizing
+Exec=$HOME/.local/bin/nsxiv-smart %F
+Icon=nsxiv
+Terminal=false
+Type=Application
+Categories=Graphics;Viewer;
+MimeType=image/bmp;image/gif;image/jpeg;image/jpg;image/png;image/tiff;image/webp;
+EOF
+# Fix the $HOME in the desktop file
+sed -i "s|\$HOME|$HOME|g" "$HOME/.local/share/applications/nsxiv-smart.desktop"
+echo "  ✓ Created nsxiv-smart.desktop"
 
 # Make scripts executable
 echo ""
@@ -44,7 +75,7 @@ echo ""
 echo "📦 Installing required packages..."
 if command -v pacman >/dev/null; then
     # Check if packages are installed, if not install them
-    PKGS="hyprland fastfetch nsxiv imagemagick"
+    PKGS="hyprland fastfetch nsxiv imagemagick jq"
     MISSING_PKGS=""
     for pkg in $PKGS; do
         if ! pacman -Qi $pkg >/dev/null 2>&1; then

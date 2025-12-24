@@ -1,0 +1,86 @@
+#!/bin/bash
+# nsxiv-smart: Opens nsxiv with window sized to image dimensions
+# Automatically scales down large images to fit within the screen
+# Requires: imagemagick (for identify)
+
+# Check if we have arguments
+if [ $# -eq 0 ]; then
+    nsxiv -b
+    exit 0
+fi
+
+# Get the first file argument (ignore flags like -b for geometry detection)
+FIRST_FILE=""
+ARGS=("$@")
+for arg in "${ARGS[@]}"; do
+    if [ -f "$arg" ]; then
+        FIRST_FILE="$arg"
+        break
+    fi
+done
+
+# Get screen dimensions from Hyprland (with fallback)
+get_screen_size() {
+    # Try hyprctl first (Hyprland)
+    if command -v hyprctl >/dev/null 2>&1; then
+        # Get focused monitor resolution
+        local resolution=$(hyprctl monitors -j 2>/dev/null | grep -oP '"width":\s*\K\d+' | head -1)
+        local height=$(hyprctl monitors -j 2>/dev/null | grep -oP '"height":\s*\K\d+' | head -1)
+        if [ -n "$resolution" ] && [ -n "$height" ]; then
+            echo "${resolution}x${height}"
+            return
+        fi
+    fi
+    
+    # Fallback to xrandr (X11/XWayland)
+    if command -v xrandr >/dev/null 2>&1; then
+        xrandr 2>/dev/null | grep -oP 'current \K\d+ x \d+' | tr -d ' ' | head -1
+        return
+    fi
+    
+    # Ultimate fallback: assume 1920x1080
+    echo "1920x1080"
+}
+
+# Calculate geometry if it's an image
+GEOMETRY=""
+if [ -n "$FIRST_FILE" ]; then
+    # Use identify to get dimensions (WxH)
+    # head -1 handles multi-frame images (GIFs) by taking only the first frame
+    DIMENSIONS=$(identify -format "%wx%h" "$FIRST_FILE" 2>/dev/null | head -1)
+    
+    if [ -n "$DIMENSIONS" ]; then
+        IMG_W=$(echo "$DIMENSIONS" | cut -dx -f1)
+        IMG_H=$(echo "$DIMENSIONS" | cut -dx -f2)
+        
+        # Get screen size
+        SCREEN_SIZE=$(get_screen_size)
+        SCREEN_W=$(echo "$SCREEN_SIZE" | cut -dx -f1)
+        SCREEN_H=$(echo "$SCREEN_SIZE" | cut -dx -f2)
+        
+        # Leave margin for title bar and borders (90% of screen)
+        MAX_W=$(( SCREEN_W * 90 / 100 ))
+        MAX_H=$(( SCREEN_H * 85 / 100 ))  # 85% height to account for title bar
+        
+        # Check if image needs scaling down
+        if [ "$IMG_W" -gt "$MAX_W" ] || [ "$IMG_H" -gt "$MAX_H" ]; then
+            # Calculate scale factor (using awk for floating point)
+            NEW_DIMS=$(awk -v iw="$IMG_W" -v ih="$IMG_H" -v mw="$MAX_W" -v mh="$MAX_H" 'BEGIN {
+                scale_w = mw / iw
+                scale_h = mh / ih
+                scale = (scale_w < scale_h) ? scale_w : scale_h
+                new_w = int(iw * scale)
+                new_h = int(ih * scale)
+                printf "%dx%d", new_w, new_h
+            }')
+            GEOMETRY="-g $NEW_DIMS"
+        else
+            # Image fits, use original dimensions
+            GEOMETRY="-g ${IMG_W}x${IMG_H}"
+        fi
+    fi
+fi
+
+# Launch nsxiv with geometry (if found) and all original arguments
+# -b: hide key/status bar (minimalist)
+exec nsxiv -b $GEOMETRY "$@"

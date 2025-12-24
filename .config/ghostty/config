@@ -1,0 +1,77 @@
+# Ghostty Configuration - Heavily Riced
+# Custom shader and aesthetic improvements
+
+# ============================================
+# CUSTOM SHADER
+# ============================================
+custom-shader = ~/.config/ghostty/shaders/shader.glsl
+custom-shader-animation = true
+
+# ============================================
+# FONTS
+# ============================================
+font-family = JetBrains Mono, Iosevka, Fira Code, Hack, monospace
+font-size = 13
+
+# ============================================
+# WINDOW APPEARANCE
+# ============================================
+# Padding for breathing room
+window-padding-x = 20
+window-padding-y = 20
+
+# Background with transparency
+background = #0a0e27
+background-opacity = 0.92
+
+# ============================================
+# COLORS - Custom Color Scheme
+# ============================================
+# Base colors
+foreground = #e0e0e0
+background = #0a0e27
+
+# Color palette (0-15)
+# 0=Black, 1=Red, 2=Green, 3=Yellow, 4=Blue, 5=Magenta, 6=Cyan, 7=White
+# 8-15 = Bright variants
+palette = 0=#1a1a2e
+palette = 1=#ff0055
+palette = 2=#00ff88
+palette = 3=#ffaa00
+palette = 4=#00aaff
+palette = 5=#ff00ff
+palette = 6=#00ffff
+palette = 7=#e0e0e0
+palette = 8=#4a4a5e
+palette = 9=#ff3377
+palette = 10=#00ffaa
+palette = 11=#ffcc00
+palette = 12=#3399ff
+palette = 13=#ff33ff
+palette = 14=#33ffff
+palette = 15=#ffffff
+
+# Selection colors
+selection-background = #ff0055
+selection-foreground = #ffffff
+
+# ============================================
+# CURSOR
+# ============================================
+cursor-color = #00ff88
+cursor-style = block
+cursor-style-blink = true
+
+# ============================================
+# SCROLLBACK
+# ============================================
+scrollback-limit = 10000
+
+# ============================================
+# KEYBINDINGS (optional - can customize)
+# ============================================
+# Copy: Ctrl+Shift+C
+# Paste: Ctrl+Shift+V
+# Font size increase: Ctrl+Plus
+# Font size decrease: Ctrl+Minus
+theme = noctalia

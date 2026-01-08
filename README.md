@@ -4,7 +4,7 @@ A collection of my dotfiles for a riced Linux desktop environment using Hyprland
 
 ## Screenshot
 
-![My Desktop Setup](screenshot.png)
+![My Desktop Setup](https://raw.githubusercontent.com/r3dg0d/dotfiles/main/screenshot.png)
 
 ## What's Included
 
@@ -20,6 +20,7 @@ A collection of my dotfiles for a riced Linux desktop environment using Hyprland
 - Hyprland window manager
 - Noctalia Shell (from AUR)
 - Fastfetch
+- Rofimoji (emoji picker, from AUR)
 - Required fonts: Nerd Fonts (for icons)
 
 ### Quick Install
@@ -30,17 +31,18 @@ git clone https://github.com/r3dg0d/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 ```
 
-2. Run the install script:
+2. Install dependencies:
+```bash
+# Install Noctalia Shell and Rofimoji from AUR
+yay -S noctalia-shell rofimoji
+# or if using paru
+paru -S noctalia-shell rofimoji
+```
+
+3. Run the install script:
 ```bash
 chmod +x install.sh
 ./install.sh
-```
-
-3. Install Noctalia Shell (if not already installed):
-```bash
-yay -S noctalia-shell
-# or
-paru -S noctalia-shell
 ```
 
 4. Reload Hyprland:
@@ -71,7 +73,7 @@ cp -r .config/fastfetch ~/.config/
 ```bash
 # Required packages
 sudo pacman -S hyprland fastfetch
-yay -S noctalia-shell  # or paru -S noctalia-shell
+yay -S noctalia-shell rofimoji  # or paru -S noctalia-shell rofimoji
 ```
 
 4. Reload Hyprland:

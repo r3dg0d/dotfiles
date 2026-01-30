@@ -587,5 +587,8 @@ rice_init() {
     fi
 }
 
-# Run init
-rice_init
+# Run init (disabled - no startup messages)
+# rice_init
+
+# opencode
+export PATH=/home/r3dg0d/.opencode/bin:$PATH

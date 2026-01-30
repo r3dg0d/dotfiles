@@ -1,0 +1,50 @@
+{
+  "emojiLauncher": {
+    "enabled": true,
+    "noTrigger": false,
+    "trigger": ":"
+  },
+  "webSearch": {
+    "enabled": true,
+    "searchEngines": [],
+    "defaultEngine": "duckduckgo"
+  },
+  "linuxWallpaperEngine": {
+    "enabled": true,
+    "monitorScenes": {
+      "HDMI-A-1": "3278968930",
+      "DP-1": "3278968930"
+    },
+    "sceneSettings": {
+      "835072294": {
+        "fps": 30
+      },
+      "1570715899": {
+        "silent": true
+      },
+      "1871781532": {
+        "silent": true
+      },
+      "2229371846": {
+        "silent": true
+      },
+      "2581416834": {
+        "scaling": "default"
+      },
+      "3181215425": {
+        "scaling": "default"
+      },
+      "3278968930": {
+        "silent": true
+      },
+      "3402021229": {
+        "scaling": "fit"
+      },
+      "3407321543": {
+        "fps": 30,
+        "silent": true
+      }
+    },
+    "generateStaticWallpaper": false
+  }
+}

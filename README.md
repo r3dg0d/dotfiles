@@ -1,6 +1,6 @@
 # My Dotfiles
 
-A collection of my dotfiles for a riced Linux desktop environment using Hyprland, Noctalia Shell, and Fastfetch.
+A collection of my dotfiles for a riced Linux desktop environment using Hyprland, Dank Material Shell (DMS), and Fastfetch.
 
 ## Screenshot
 
@@ -9,8 +9,10 @@ A collection of my dotfiles for a riced Linux desktop environment using Hyprland
 ## What's Included
 
 - **Hyprland** - Window manager configuration
-- **Noctalia Shell** - Modern shell/bar replacement with panels, widgets, and desktop integration
+- **Dank Material Shell (DMS)** - Modern, Material-inspired shell/bar replacement with panels, widgets, and desktop integration
 - **Fastfetch** - System information display with custom OS installation date and age modules
+- **Ghostty** - Terminal emulator configuration
+- **GTK 3.0/4.0** - Material-based themes and settings
 
 ## Installation
 
@@ -18,8 +20,9 @@ A collection of my dotfiles for a riced Linux desktop environment using Hyprland
 
 - Arch Linux
 - Hyprland window manager
-- Noctalia Shell (from AUR)
+- Dank Material Shell
 - Fastfetch
+- Ghostty
 - Required fonts: Nerd Fonts (for icons)
 
 ### Quick Install
@@ -36,14 +39,7 @@ chmod +x install.sh
 ./install.sh
 ```
 
-3. Install Noctalia Shell (if not already installed):
-```bash
-yay -S noctalia-shell
-# or
-paru -S noctalia-shell
-```
-
-4. Reload Hyprland:
+3. Reload Hyprland:
 ```bash
 hyprctl reload
 ```
@@ -56,25 +52,18 @@ If you prefer to install manually:
 ```bash
 mkdir -p ~/.config-backup
 cp -r ~/.config/hypr ~/.config-backup/ 2>/dev/null
-cp -r ~/.config/noctalia ~/.config-backup/ 2>/dev/null
+cp -r ~/.config/DankMaterialShell ~/.config-backup/ 2>/dev/null
 cp -r ~/.config/fastfetch ~/.config-backup/ 2>/dev/null
 ```
 
 2. Copy the dotfiles:
 ```bash
 cp -r .config/hypr ~/.config/
-cp -r .config/noctalia ~/.config/
+cp -r .config/DankMaterialShell ~/.config/
 cp -r .config/fastfetch ~/.config/
 ```
 
-3. Install dependencies:
-```bash
-# Required packages
-sudo pacman -S hyprland fastfetch
-yay -S noctalia-shell  # or paru -S noctalia-shell
-```
-
-4. Reload Hyprland:
+3. Reload Hyprland:
 ```bash
 hyprctl reload
 ```
@@ -83,77 +72,47 @@ hyprctl reload
 
 ### Hyprland
 
-- **Monitors**: Configured for dual monitor setup
-- **Keybindings**: Custom keybindings for applications and window management
-- **Input**: Keyboard and mouse configuration
-- **Appearance**: Window rules and visual settings
+- **Monitors**: Configured for dual monitor setup (DP-1 and HDMI-A-1)
+- **Keybindings**: Custom keybindings for DMS integration (Spotlight, Clipboard, Process List, etc.)
+- **Input**: Keyboard and mouse configuration with numlock enabled
+- **Animations**: Custom animations for windows and workspaces
 
 **Important**: Update monitor configuration in `hyprland.conf` to match your monitor setup!
 
-### Noctalia Shell
+### Dank Material Shell (DMS)
 
-- **Panels**: Customizable panels with transparency and animations
-- **Widgets**: System monitoring, workspace management, media controls
-- **Desktop Widgets**: Multi-monitor support with positioning and scaling
-- **Plugin System**: Support for git forges and custom plugins
-- **Settings**: Comprehensive configuration UI
+- **Panels**: Material You inspired panels with transparency and animations
+- **Widgets**: System monitoring, workspace management, media controls, and notifications
+- **IPC Support**: Integrated with Hyprland keybindings for seamless control
+- **Settings**: Comprehensive JSON-based configuration
 
-Noctalia Shell replaces traditional status bars (like Waybar) with a more modern, integrated approach. Configuration is done through the Noctalia settings panel or by editing the config files directly.
+DMS replaces traditional status bars with a more modern, integrated approach. Configuration is managed in `~/.config/DankMaterialShell/`.
 
 ### Fastfetch
 
 - **Custom Modules**: 
   - OS Installation Date (from pacman.log)
   - OS Age (calculated from installation date)
-- **Hyprland Preset**: Uses the Hyprland preset with custom modifications
-- **Display**: Shows system information with consistent styling
-
-The Fastfetch config includes custom command modules that calculate the actual OS installation date from `/var/log/pacman.log` and display the age of the installation.
+- **Display**: Shows system information with consistent styling and custom ASCII art
 
 ## Customization
 
 ### Monitor Configuration
 
-Edit `~/.config/hypr/hyprland.conf` to match your setup. Look for monitor configuration lines like:
+Edit `~/.config/hypr/hyprland.conf` to match your setup. Look for monitor configuration lines:
 
 ```bash
-monitor=DP-1,1920x1080@143.85,0x0,1
-monitor=HDMI-A-1,3440x1440@179.99,1920x0,1
+monitor=DP-1, 3440x1440@180, 0x0, 1
+monitor=HDMI-A-1, 3440x1440@180, 3440x0, 1
 ```
 
-### Noctalia Shell Configuration
+### DMS Configuration
 
-Noctalia Shell can be configured through:
-1. **Settings Panel**: Access via the Noctalia settings application
-2. **Config Files**: Edit files in `~/.config/noctalia/` directly
-3. **Plugins**: Install and configure plugins through the settings panel
-
-### Keybindings
-
-Main keybindings are in `~/.config/hypr/hyprland.conf`. Edit to customize.
-
-## Troubleshooting
-
-### Noctalia Shell not appearing
-- Ensure Noctalia Shell is installed: `yay -S noctalia-shell`
-- Check if it's running: `ps aux | grep noctalia`
-- Restart Hyprland: `hyprctl reload`
-
-### Monitor configuration issues
-- Check your monitor names: `hyprctl monitors`
-- Update `hyprland.conf` with correct names and resolutions
-
-### Fastfetch not showing correct installation date
-- Ensure `/var/log/pacman.log` exists and is readable
-- The installation date is calculated from the first entry in pacman.log
+DMS can be configured by editing the settings in `~/.config/DankMaterialShell/settings.json`.
 
 ## Migration Notes
 
-This setup uses:
-- **Arch Linux** (standard installation)
-- **Noctalia Shell** (modern shell replacement)
-
-The configuration has been updated to use Noctalia Shell instead of traditional status bars.
+This setup has migrated from Noctalia Shell to **Dank Material Shell**. It offers better integration with Hyprland and a more refined Material design aesthetic.
 
 ## License
 
@@ -162,7 +121,7 @@ This configuration is free to use and modify. Feel free to fork and adapt it to 
 ## Credits
 
 - Inspired by various ricing communities
-- Noctalia Shell: [noctalia-dev/noctalia-shell](https://github.com/noctalia-dev/noctalia-shell)
+- Dank Material Shell: [r3dg0d/DankMaterialShell](https://github.com/r3dg0d/DankMaterialShell)
 - Fastfetch: [fastfetch-cli/fastfetch](https://github.com/fastfetch-cli/fastfetch)
 
 ## Contributing

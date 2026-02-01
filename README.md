@@ -23,6 +23,8 @@ A collection of my dotfiles for a riced Linux desktop environment using Hyprland
 - Dank Material Shell
 - Fastfetch
 - Ghostty
+- Quickshell (AUR)
+- Matugen (AUR)
 - Required fonts: Nerd Fonts (for icons)
 
 ### Quick Install

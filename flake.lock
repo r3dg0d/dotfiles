@@ -1,0 +1,178 @@
+{
+  "nodes": {
+    "ambxst": {
+      "inputs": {
+        "axctl": "axctl",
+        "nixpkgs": "nixpkgs"
+      },
+      "locked": {
+        "lastModified": 1789228675,
+        "narHash": "sha256-5FJ1+vvzGEF+4YOyUkOY5fCy07XGOx/xdHuxDiCHQZ0=",
+        "owner": "Axenide",
+        "repo": "Ambxst",
+        "rev": "d6a3b7207bdc9591d545ee6cac785446279a5a72",
+        "type": "github"
+      },
+      "original": {
+        "narHash": "sha256-5FJ1+vvzGEF+4YOyUkOY5fCy07XGOx/xdHuxDiCHQZ0=",
+        "owner": "Axenide",
+        "repo": "Ambxst",
+        "rev": "d6a3b7207bdc9591d545ee6cac785446279a5a72",
+        "type": "github"
+      }
+    },
+    "axctl": {
+      "inputs": {
+        "nixpkgs": [
+          "ambxst",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1788986922,
+        "narHash": "sha256-QwrH89TPuG1+zueHENWO0RBonVGWdBcdjx08pJ2bJu0=",
+        "owner": "Axenide",
+        "repo": "axctl",
+        "rev": "86ce5abcecd68e9e828b69885ac3551686066c4a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Axenide",
+        "repo": "axctl",
+        "type": "github"
+      }
+    },
+    "boo": {
+      "inputs": {
+        "flake-utils": "flake-utils",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1783276419,
+        "narHash": "sha256-phNbC7IoF+DZ6tzPFN+VwEN/GUKKqIM3GAMLnppdUBM=",
+        "owner": "coder",
+        "repo": "boo",
+        "rev": "39245a70b2b3c66da3e5f47e80e84926d790863f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "coder",
+        "repo": "boo",
+        "rev": "39245a70b2b3c66da3e5f47e80e84926d790863f",
+        "type": "github"
+      }
+    },
+    "durdraw": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789102450,
+        "narHash": "sha256-wpb45G+IIu9ZqHGhOQDPP4s4MiGLoRk0UyibeN4oZww=",
+        "owner": "durdraw",
+        "repo": "durdraw",
+        "rev": "bacad9c4c3254ca9ffc95122b899e1d3293b063c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "durdraw",
+        "repo": "durdraw",
+        "rev": "bacad9c4c3254ca9ffc95122b899e1d3293b063c",
+        "type": "github"
+      }
+    },
+    "flake-utils": {
+      "inputs": {
+        "systems": "systems"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "nix-flatpak": {
+      "locked": {
+        "lastModified": 1789296110,
+        "narHash": "sha256-8wVBx1J5hR1DzUyzlrm2DkMXx7RJbATh3+R+qBBILlI=",
+        "owner": "gmodena",
+        "repo": "nix-flatpak",
+        "rev": "0f392e302963bce69787c495aa95ef1d50dda889",
+        "type": "github"
+      },
+      "original": {
+        "narHash": "sha256-8wVBx1J5hR1DzUyzlrm2DkMXx7RJbATh3+R+qBBILlI=",
+        "owner": "gmodena",
+        "repo": "nix-flatpak",
+        "rev": "0f392e302963bce69787c495aa95ef1d50dda889",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1789006805,
+        "narHash": "sha256-xB8mKMOx1IA9vTDNLmJZ6n4wCMq/cuWBBOzGCRnqxrU=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "8ce4ef6cb6f871616146b9fe26d2a5ae594e94fe",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_2": {
+      "locked": {
+        "lastModified": 315532800,
+        "narHash": "sha256-3i80JnZ9pZ7tWReb/Sqpc32cfzffCu8TWLnbnH0hN9c=",
+        "type": "tarball",
+        "url": "https://releases.nixos.org/nixos/unstable/nixos-26.11pre1073009.ef34387ddd75/nixexprs.tar.xz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://releases.nixos.org/nixos/unstable/nixos-26.11pre1073009.ef34387ddd75/nixexprs.tar.xz"
+      }
+    },
+    "root": {
+      "inputs": {
+        "ambxst": "ambxst",
+        "boo": "boo",
+        "durdraw": "durdraw",
+        "nix-flatpak": "nix-flatpak",
+        "nixpkgs": "nixpkgs_2"
+      }
+    },
+    "systems": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

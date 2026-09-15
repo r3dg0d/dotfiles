@@ -1,0 +1,44 @@
+# Build output and editor state
+result
+result-*
+*.log
+*.cache
+*.bak
+*.swp
+*.swo
+*.tmp
+*~
+.direnv/
+.cache/
+__pycache__/
+# Private deployment and credentials must stay OUTSIDE this repository.
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+*.asc
+id_rsa*
+id_ed25519*
+secrets/
+private/
+local/
+backups/
+checks-output/
+# Runtime state and application accounts
+*.db
+*.db-*
+*.sqlite*
+*.keyring
+*.history
+.bash_history
+.zsh_history
+.claude/
+.codex/
+.ssh/
+.gnupg/
+.var/
+*.qcow2
+*.iso
+*.AppImage

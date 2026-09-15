@@ -1,0 +1,14 @@
+title = "Workstation publication scan"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "generic-api-key"
+
+[[rules.allowlists]]
+description = "The calculator multimedia key is a key symbol, not an API credential."
+condition = "AND"
+regexTarget = "secret"
+regexes = ['^XF86Calculator$']
+paths = ['(^|/)config/ambxst/binds\.json$']

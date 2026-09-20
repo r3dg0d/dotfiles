@@ -37,6 +37,14 @@ class PrivacyTests(unittest.TestCase):
             with self.subTest(name=name):
                 self.assertTrue(scanner.scan(name, data)[0])
 
+    def test_reviewed_screenshots_are_allowed_but_only_narrowly(self):
+        png = b"\x89PNG\r\n\x1a\n" + b"\0" * 512
+        self.assertEqual(scanner.scan("assets/screenshots/desktop.png", png)[0], [])
+        # Oversized, mislabelled, or somewhere else: still reported.
+        self.assertTrue(scanner.scan("assets/screenshots/huge.png", png + b"\0" * scanner.SCREENSHOT_LIMIT)[0])
+        self.assertTrue(scanner.scan("assets/screenshots/notes.png", b"plain text pretending to be a screenshot")[0])
+        self.assertTrue(scanner.scan("config/desktop.png", png)[0])
+
     def test_index_and_history_are_not_worktree(self):
         with tempfile.TemporaryDirectory() as directory:
             old_root = scanner.ROOT

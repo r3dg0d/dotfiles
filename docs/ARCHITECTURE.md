@@ -28,7 +28,7 @@ The public `nixosConfigurations.workstation` adds example hardware to the same c
 
 ## Service ownership
 
-System: NetworkManager, PipeWire integration, Bluetooth, Flatpak installer, Mullvad, Ollama (CUDA, loopback), Ly and existing security policy. User: MPD, desktop/icon cache refresh path/service, Obsidian graphical session service and API healthcheck timer. These services existed before migration. No new network service was introduced.
+System: NetworkManager, PipeWire integration, Bluetooth, Flatpak installer, Mullvad, Ollama (CUDA, loopback), SDDM (Wayland greeter, Matrix Code Rain theme) and existing security policy. User: MPD, desktop/icon cache refresh path/service, Obsidian graphical session service and API healthcheck timer. These services existed before migration. No new network service was introduced.
 
 Existing generic user services and user tmpfiles are NixOS-wide; the linked core configs and MPD are scoped to the selected account, while writable seeds can apply to other user managers. Review that if turning this personal setup into a multi-user host.
 

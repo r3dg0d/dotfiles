@@ -60,7 +60,7 @@ Keep the private lock and hardware out of public Git. Nix copies referenced sour
 
 ## Account and application setup
 
-The configuration creates the selected user but contains no password/hash. On a fresh installation, set a password through the installer or `passwd` in the installed system before relying on Ly or sudo. The configuration retains password-required sudo and disables SSH; plan local console access.
+The configuration creates the selected user but contains no password/hash. On a fresh installation, set a password through the installer or `passwd` in the installed system before relying on the display manager or sudo. The configuration retains password-required sudo and disables SSH; plan local console access.
 
 - Establish networking interactively with NetworkManager; restore Wi-Fi/VPN credentials privately.
 - Log into application accounts, GitHub, Steam, Mullvad and Flatpak applications as needed.

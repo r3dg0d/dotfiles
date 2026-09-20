@@ -31,6 +31,20 @@ KEYWORDS = re.compile(r"API_KEY|API_TOKEN|TOKEN|SECRET|PASSWORD|PASSWD|PRIVATE_K
 FORBIDDEN_PARTS = {".ssh", ".gnupg", ".claude", ".codex", "backups", "secrets", "private", "node_modules", ".cache", ".var"}
 FORBIDDEN_NAMES = {".env", "machine-id", "shadow", "cookies", "cookies.sqlite", "login data", "key4.db", "logins.json", ".bash_history", ".zsh_history", "hosts.yml", "auth.json"}
 FORBIDDEN_SUFFIXES = {".pem", ".key", ".asc", ".p12", ".pfx", ".db", ".sqlite", ".log", ".bak"}
+# Screenshots are the one kind of binary this repository publishes. They are
+# reviewed by eye before being added -- for visible credentials, window titles,
+# private documents and personal identifiers -- which no regex can do. The
+# exemption is deliberately narrow: only PNGs, only under this directory, only
+# up to this size, and only if the bytes really are a PNG, so nothing else can
+# be smuggled in under an image's name.
+SCREENSHOT_DIRECTORY = "assets/screenshots"
+SCREENSHOT_MAGIC = b"\x89PNG\r\n\x1a\n"
+SCREENSHOT_LIMIT = 2 * 1024 * 1024
+
+
+def is_reviewed_screenshot(path, data):
+    return (path.parent.as_posix() == SCREENSHOT_DIRECTORY and path.suffix == ".png"
+            and data.startswith(SCREENSHOT_MAGIC))
 
 
 def git(*args):
@@ -39,10 +53,18 @@ def git(*args):
 
 def scan(name, data):
     findings = []
-    path = Path(name)
+    path = Path(name.removesuffix(" (history)"))
     if (FORBIDDEN_PARTS.intersection(path.parts) or path.name.lower() in FORBIDDEN_NAMES
             or path.name.startswith(".env.") or path.suffix in FORBIDDEN_SUFFIXES):
         findings.append((0, "sensitive-or-state-filename"))
+    if path.parent.as_posix() == SCREENSHOT_DIRECTORY:
+        # Anything here must really be a PNG image: the exemption below is for
+        # reviewed screenshots, not for a text file wearing a .png name.
+        if not is_reviewed_screenshot(path, data):
+            findings.append((0, "screenshot-directory-non-image"))
+        elif len(data) > SCREENSHOT_LIMIT:
+            findings.append((0, "screenshot-over-size-limit"))
+        return findings, 0
     if len(data) > 262144:
         findings.append((0, "unexpected-large-file"))
     try:

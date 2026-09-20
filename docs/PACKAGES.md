@@ -4,7 +4,7 @@ This inventory derives from installed declarations, profiles, Flatpak enumeratio
 
 | Category | Preserved software / owner |
 | --- | --- |
-| Desktop | Hyprland, Ambxst/Quickshell bundle, Ly, Nautilus, GTK portal, Bibata (`desktop`, `ambxst`, `cursor`) |
+| Desktop | Hyprland, Ambxst/Quickshell bundle, SDDM + Matrix Code Rain greeter, Nautilus, GTK portal, Bibata (`desktop`, `ambxst`, `cursor`, `login-manager`) |
 | Development | Rust/Cargo/Clippy/rustfmt/analyzer; GCC, Clang, clang-cl wrapper, LLVM tools, GDB/LLDB, CMake/Ninja/Meson/Make, MinGW, Python/pipx, Zig/ZLS, GitHub CLI |
 | Android | Android Studio with composed SDK/emulator, adb tools, Gradle and gradle9; no system images or NDK |
 | Terminal | Ghostty CRT theme, Bash, tmux, boo, fetch, ttyper, durdraw |

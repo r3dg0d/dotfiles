@@ -2,7 +2,7 @@
 
 ## Boot, login and NVIDIA
 
-Keep a known-good boot generation. Ly's display-manager conflicts with the tty1 getty; activating it from that TTY can end the current login. Prefer `nixos-rebuild boot` and a deliberate reboot for that transition. The source setup uses systemd-boot, EFI writes and Linux 7.2; do not interpret the old LTS comment as a kernel-support promise.
+Keep a known-good boot generation. The display-manager service conflicts with the tty1 getty; activating it from that TTY can end the current login. Prefer `nixos-rebuild boot` and a deliberate reboot for that transition. If the SDDM greeter ever fails to appear, switch to another VT (Ctrl+Alt+F2), log in and run `start-hyprland`, or select an older generation at boot. The source setup uses systemd-boot, EFI writes and Linux 7.2; do not interpret the old LTS comment as a kernel-support promise.
 
 Preserve the current stable NVIDIA package/open-module/modesetting combination when first reproducing the machine. Do not add generic NVIDIA environment-variable recipes. The hardware baseline is an RTX 4090 with 32-bit graphics and audio for Steam. Different GPUs require a separately reviewed module change.
 

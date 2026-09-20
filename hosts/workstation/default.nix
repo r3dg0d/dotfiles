@@ -21,10 +21,11 @@
     ../../modules/music.nix
     ../../modules/user-desktop.nix
     ../../modules/cursor.nix
-    # ly's display-manager.service Conflicts=autovt@tty1.service, which
+    # The display manager's service Conflicts=autovt@tty1.service, which
     # stops the getty carrying a live tty1 session — apply with
     # `rebuild boot` + reboot rather than `switch` from that session.
     ../../modules/login-manager.nix
+    ../../modules/shell-greeting.nix
     ../../modules/flatpak.nix
     ../../modules/desktop-integration.nix
     ../../modules/screen-recorder.nix

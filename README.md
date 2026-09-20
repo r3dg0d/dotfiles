@@ -5,7 +5,7 @@ An audited configuration extracted from a working Intel / NVIDIA RTX 4090 workst
 ## Stack
 
 - NixOS, pinned nixpkgs, Linux 7.2, systemd-boot, NVIDIA open kernel modules with the stable driver package.
-- Hyprland / XWayland, Ambxst shell, Ly login manager, PipeWire, Bibata cursor and JetBrains Mono Nerd Font.
+- Hyprland / XWayland, Ambxst shell, SDDM with the [Matrix Code Rain](https://github.com/r3dg0d/matrix-code-rain-sddm) greeter theme, PipeWire, Bibata cursor and JetBrains Mono Nerd Font.
 - Bash, Ghostty, Git, tmux, Rust/C/C++/Python/Android tools; Firefox, Thunderbird, Obsidian, MPD/rmpc, Steam, Ollama CUDA and security/OSINT tools.
 - NixOS modules manage packages and selected native files. **Home Manager is not used.** Ambxst settings remain writable and are seeded only when absent.
 
@@ -18,9 +18,44 @@ modules/               existing functional NixOS modules
 config/                native Lua, Ghostty, Ambxst and theme settings
 packages/ / dev/       custom packages and development shell
 scripts/               validation and privacy checks
+assets/screenshots/    reviewed screenshots used by this README
 docs/                  audit, migration, installation and recovery
 licenses/              retained third-party notices
 ```
+
+## Screenshots
+
+### Matrix Code Rain (SDDM)
+
+![Matrix Code Rain SDDM theme](assets/screenshots/sddm-matrix-code-rain.png)
+
+The login screen: Katakana code rain animated in QML behind a black-and-green
+panel, with a profile image, user, password and session controls and compact
+power actions. The theme is a separate project,
+[matrix-code-rain-sddm](https://github.com/r3dg0d/matrix-code-rain-sddm), which
+`modules/login-manager.nix` pins by revision. Captured from
+`sddm-greeter-qt6 --test-mode` at 3440×1440.
+
+### Desktop
+
+![Hyprland desktop](assets/screenshots/hyprland-desktop.png)
+
+Hyprland with the Ambxst shell and its horizontal scrolling layout, on the
+3440×1440 ultrawide this configuration targets.
+
+### Ghostty
+
+![Ghostty terminal](assets/screenshots/ghostty-terminal.png)
+
+Ghostty with the green phosphor CRT shader from `config/ghostty`, showing the
+per-terminal host banner from `modules/shell-greeting.nix`.
+
+### Application launcher
+
+![Application launcher](assets/screenshots/application-launcher.png)
+
+`fuzzel`, listing desktop entries from the system profile — here the Legacy iOS
+Kit launcher entry and its icon.
 
 ## Start here
 
@@ -39,7 +74,7 @@ For a machine intentionally configured to match the public example:
 sudo nixos-rebuild switch --flake .#workstation
 ```
 
-For an existing TTY session, Ly activation may interrupt login: prefer a reviewed `nixos-rebuild boot` followed by a deliberate reboot. The private-deployment instructions are the recommended path for the original workstation.
+For an existing TTY session, activating a display manager may interrupt login: its service conflicts with the tty1 getty. Prefer a reviewed `nixos-rebuild boot` followed by a deliberate reboot. The private-deployment instructions are the recommended path for the original workstation.
 
 ## Customize and update
 
@@ -53,8 +88,19 @@ Select an older generation in the boot menu, or use `sudo nixos-rebuild switch -
 
 No account tokens, private keys, machine identifiers, browser profiles, vaults, history, logs or wallpapers are included. Configure secrets outside this repository **and outside Nix source paths**; see [PRIVACY](docs/PRIVACY.md). Original configuration and scripts use MIT; retained template material keeps its own license, described in [NOTICE](NOTICE.md).
 
+Not everything on the source machine is published here. The workstation also
+runs modules this repository deliberately omits — among them an Apple device
+and virtualization workbench whose launcher entries include **Legacy iOS Kit**
+(a terminal launcher, its own icon, and udev access for devices in DFU and
+recovery mode), local AI and media services, and emulator packaging. Those
+carry their own licensing and privacy review and are kept in the private
+deployment.
+
 This reconstructs configuration, not personal data or application accounts. Flatpak applications update independently of Nix; downloaded models, Steam games, Obsidian plugins, credentials and wallpapers need separate setup. Existing Ambxst runtime color errors are documented, not silently fixed.
 
-Screenshots can be added later after checking visible personal information and asset redistribution rights.
+The screenshots above were reviewed for visible personal information before
+publication; `scripts/privacy-scan.py` additionally refuses anything under
+`assets/screenshots/` that is not a PNG within a size limit. The desktop shot
+deliberately omits the top bar, whose media widget shows whatever is playing.
 
 See [SYSTEM-AUDIT](docs/SYSTEM-AUDIT.md), [MIGRATION](docs/MIGRATION.md), [PACKAGES](docs/PACKAGES.md), and [VALIDATION](docs/VALIDATION.md).

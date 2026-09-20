@@ -13,15 +13,21 @@
   runCommand,
   fetchFromGitHub,
   qt6,
+  kdePackages,
 }:
 let
   themeId = "matrix-code-rain";
 
+  # The greeter SDDM will actually start, and its Qt major version. Both are
+  # asserted against the theme's metadata below.
+  sddm = kdePackages.sddm;
+  qtMajor = lib.versions.major qt6.qtbase.version;
+
   src = fetchFromGitHub {
     owner = "r3dg0d";
     repo = "matrix-code-rain-sddm";
-    rev = "a28b534052bd03315147503f8b4c203568f10d2a";
-    hash = "sha256-TE9vY/mSZxNt0F9wobfZk1CK6gSEXOqsO6fsNiASbs8=";
+    rev = "3b387f5e7f4268eb4e6b5281da3f9fb8e6a59d25";
+    hash = "sha256-oIzC5HP0Yt/oD+aFTQjCjEy6WQk/5iboaDbGHCV34ho=";
   };
 in
 runCommand "sddm-theme-${themeId}"
@@ -55,4 +61,22 @@ runCommand "sddm-theme-${themeId}"
       -I "$themeDir" \
       --unqualified disable \
       "$themeDir"/*.qml "$themeDir"/components/*.qml
+
+    # SDDM's daemon reads SddmGreeterTheme/QtVersion from metadata.desktop and
+    # defaults it to 5, then requires a `sddm-greeter` binary for that version.
+    # This SDDM is Qt6-only (`sddm-greeter-qt6`), so a theme that omits the key
+    # is skipped in favour of the built-in fallback -- and the greeter never
+    # sees the theme, so `sddm-greeter-qt6 --test-mode` cannot catch it. The
+    # only symptom is one line in the daemon's journal, which is how this was
+    # found in the first place.
+    declaredQt=$(sed -n 's/^QtVersion=//p' "$themeDir/metadata.desktop")
+    if [ "$declaredQt" != "${toString qtMajor}" ]; then
+      echo "metadata.desktop declares QtVersion='$declaredQt';" \
+           "this SDDM needs ${toString qtMajor}." >&2
+      exit 1
+    fi
+    if [ ! -x "${sddm}/bin/sddm-greeter-qt${toString qtMajor}" ]; then
+      echo "${sddm} has no sddm-greeter-qt${toString qtMajor} for the theme to run in." >&2
+      exit 1
+    fi
   ''

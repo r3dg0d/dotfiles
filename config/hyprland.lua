@@ -266,9 +266,16 @@ local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 -- Example binds, see https://wiki.hypr.land/Configuring/Basics/Binds/ for more
 hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + Q", hl.dsp.window.close())              -- killactive
--- Ambxst's own launcher action (see ~/.config/ambxst/binds.json "launcher"),
--- moved here from its default Super_L-only trigger.
-hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("ambxst run launcher"), { repeating = true })
+-- fuzzel, themed black/green in config/fuzzel.ini to match Ghostty and the
+-- Matrix Code Rain greeter. `app-launcher` (modules/app-launcher.nix) is a
+-- thin wrapper that refuses to open a second instance on top of the first.
+--
+-- This replaces Ambxst's own launcher action here. That action still exists
+-- and still runs as `ambxst run launcher`; only this key no longer calls it,
+-- so config/ambxst/binds.json still *lists* SUPER + SPACE for it. Hyprland
+-- binds are authoritative, and Ambxst's file is a writable user setting this
+-- configuration only seeds.
+hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("app-launcher"))
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
 hl.bind(mainMod .. " + F", hl.dsp.exec_cmd(fileManager))
 -- Moved from SUPER + V (see below): that key is Ambxst's Clipboard action.

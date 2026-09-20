@@ -26,6 +26,7 @@
     # `rebuild boot` + reboot rather than `switch` from that session.
     ../../modules/login-manager.nix
     ../../modules/shell-greeting.nix
+    ../../modules/app-launcher.nix
     ../../modules/flatpak.nix
     ../../modules/desktop-integration.nix
     ../../modules/screen-recorder.nix

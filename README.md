@@ -15,7 +15,7 @@ An audited configuration extracted from a working Intel / NVIDIA RTX 4090 workst
 flake.nix / flake.lock  pinned inputs and host constructor
 hosts/workstation/     system baseline and PUBLIC EXAMPLE hardware
 modules/               existing functional NixOS modules
-config/                native Lua, Ghostty, Ambxst and theme settings
+config/                native Lua, Ghostty, fuzzel, Ambxst and theme settings
 packages/ / dev/       custom packages and development shell
 scripts/               validation and privacy checks
 assets/screenshots/    reviewed screenshots used by this README
@@ -54,8 +54,9 @@ per-terminal host banner from `modules/shell-greeting.nix`.
 
 ![Application launcher](assets/screenshots/application-launcher.png)
 
-`fuzzel`, listing desktop entries from the system profile — here the Legacy iOS
-Kit launcher entry and its icon.
+`fuzzel` on `SUPER + SPACE`, themed to match in `config/fuzzel.ini` and wired
+up by `modules/app-launcher.nix` — here finding the Legacy iOS Kit entry and
+its icon. The same binary, and the same theme, serve the "Open With" picker.
 
 ## Start here
 

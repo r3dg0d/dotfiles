@@ -1,6 +1,7 @@
 { config, pkgs, ... }:
 let
-  mpdConfig = pkgs.writeText "${config.workstation.username}-mpd.conf" ''
+  user = config.workstation.username;
+  mpdConfig = pkgs.writeText "neo-mpd.conf" ''
     music_directory "~/Music"
     playlist_directory "~/.local/state/mpd/playlists"
     db_file "~/.local/state/mpd/database"
@@ -14,18 +15,13 @@ let
       name "PipeWire"
     }
   '';
-in
-{
-  environment.systemPackages = [
-    pkgs.mpd
-    pkgs.rmpc
-    pkgs.mpc
-  ];
-  # User service uses ${config.workstation.username}'s PipeWire/Pulse socket, without a competing system MPD.
+in {
+  environment.systemPackages = [ pkgs.mpd pkgs.rmpc pkgs.mpc ];
+  # User service uses neo's PipeWire/Pulse socket, without a competing system MPD.
   systemd.user.services.mpd = {
-    description = "Music Player Daemon for ${config.workstation.username}";
+    description = "Music Player Daemon for neo";
     wantedBy = [ "default.target" ];
-    unitConfig.ConditionUser = "${config.workstation.username}";
+    unitConfig.ConditionUser = user;
     serviceConfig = {
       ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p %h/Music %h/.local/state/mpd/playlists";
       ExecStart = "${pkgs.mpd}/bin/mpd --no-daemon ${mpdConfig}";

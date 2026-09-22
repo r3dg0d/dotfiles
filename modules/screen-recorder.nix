@@ -14,8 +14,11 @@ let
   # keeps working as-is if a future driver update fixes NVENC, and costs
   # nothing when GPU encoding *is* available.
   #
-  # This wrapper covers direct CLI calls. Ambxst prepends its own bundled
-  # recorder, so modules/ambxst.nix separately patches its backend arguments.
+  # Ambxst's own recorder (backend/pkg/svc/recorder/service.go) execs
+  # "gpu-screen-recorder" without that flag and can't be told to add it
+  # (its args are hardcoded in its Go source, which is out of scope to
+  # patch), so the flag has to be injected at the binary Ambxst actually
+  # finds on PATH instead.
   gpuScreenRecorderWithFallback = pkgs.symlinkJoin {
     name = "gpu-screen-recorder-with-fallback";
     paths = [ pkgs.gpu-screen-recorder ];
@@ -26,8 +29,7 @@ let
         --add-flags "-fallback-cpu-encoding yes"
     '';
   };
-in
-{
+in {
   # programs.gpu-screen-recorder still does the real work: installs the
   # plain pkgs.gpu-screen-recorder and generates the gsr-kms-server
   # security wrapper KMS capture needs. This is a Linux-capability

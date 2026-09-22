@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1b2a4a"/>
+      <stop offset="1" stop-color="#0b1220"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4fc3f7"/>
+      <stop offset="1" stop-color="#2979ff"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="240" height="240" rx="52" fill="url(#bg)"/>
+  <rect x="8.5" y="8.5" width="239" height="239" rx="51.5" fill="none" stroke="#2c4470" stroke-width="1"/>
+  <!-- gamepad silhouette -->
+  <path d="M74 112h108c19 0 34 15 34 34v6c0 16-13 29-29 29-10 0-19-5-24-14l-7-12H90l-7 12c-5 9-14 14-24 14-16 0-29-13-29-29v-6c0-19 15-34 34-34z"
+        fill="none" stroke="url(#accent)" stroke-width="10" stroke-linejoin="round"/>
+  <!-- d-pad -->
+  <path d="M70 146h26M83 133v26" stroke="#8fd3ff" stroke-width="9" stroke-linecap="round"/>
+  <!-- buttons -->
+  <circle cx="176" cy="136" r="7" fill="#8fd3ff"/>
+  <circle cx="192" cy="152" r="7" fill="#8fd3ff"/>
+  <circle cx="160" cy="152" r="7" fill="#8fd3ff"/>
+  <!-- K monogram -->
+  <path d="M104 42v48M104 66l30-24M104 66l32 24" stroke="url(#accent)" stroke-width="11"
+        stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

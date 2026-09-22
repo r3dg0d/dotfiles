@@ -3,9 +3,9 @@
   environment.systemPackages = [
     pkgs.thunderbird
     pkgs.qbittorrent
-    pkgs.dino # XMPP/Jabber client; no account pre-configured
+    pkgs.dino     # XMPP/Jabber client; no account pre-configured
     pkgs.yt-dlp
-    pkgs.ffmpeg # needed by yt-dlp for merging separate audio/video streams
+    pkgs.ffmpeg   # needed by yt-dlp for merging separate audio/video streams
     pkgs.mpv
   ];
   services.flatpak.enable = true;

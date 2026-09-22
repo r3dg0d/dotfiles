@@ -11,25 +11,39 @@
 
 {
   imports = [
-    # Include the results of the hardware scan.
     ../../modules/identity.nix
     ../../modules/security-tools.nix
     ../../modules/development.nix
+    ../../modules/development-services.nix
+    ../../modules/pi-coding-agent.nix
+    ../../modules/zed.nix
+    ../../modules/game-dev.nix
+    ../../modules/apps-extra.nix
     ../../modules/gaming.nix
     ../../modules/desktop.nix
     ../../modules/ambxst.nix
     ../../modules/music.nix
     ../../modules/user-desktop.nix
+    ../../modules/default-applications.nix
     ../../modules/cursor.nix
-    # The display manager's service Conflicts=autovt@tty1.service, which
-    # stops the getty carrying a live tty1 session — apply with
-    # `rebuild boot` + reboot rather than `switch` from that session.
+    # Display manager Conflicts=autovt@tty1 — prefer `rebuild boot` + reboot
+    # rather than `switch` from a live tty1 session.
     ../../modules/login-manager.nix
     ../../modules/shell-greeting.nix
     ../../modules/app-launcher.nix
     ../../modules/flatpak.nix
     ../../modules/desktop-integration.nix
     ../../modules/screen-recorder.nix
+    ../../modules/jellyfin.nix
+    ../../modules/lokinet.nix
+    ../../modules/firefox-loki.nix
+    ../../modules/helium.nix
+    ../../modules/ai-media.nix
+    ../../modules/local-ai-tools.nix
+    ../../modules/workstation-polish.nix
+    ../../modules/discord-clients.nix
+    ../../modules/matrixshot-path.nix
+    ../../modules/privsec-tools-path.nix
   ];
 
   # Graphics Card (NVIDIA RTX 4090) Drivers

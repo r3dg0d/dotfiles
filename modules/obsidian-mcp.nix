@@ -1,9 +1,9 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 let
   # Obsidian's Local REST API plugin runs inside the Obsidian process itself
   # (there is no standalone daemon to package separately - see
   # https://github.com/coddingtonbear/obsidian-local-rest-api). This unit
-  # keeps Obsidian itself running persistently for ${config.workstation.username}'s graphical session so
+  # keeps Obsidian itself running persistently for neo's graphical session so
   # the plugin's HTTPS API on 127.0.0.1:27124 stays available to mcp-obsidian.
   healthcheck = pkgs.writeShellApplication {
     name = "obsidian-rest-api-healthcheck";
@@ -31,8 +31,7 @@ let
       fi
     '';
   };
-in
-{
+in {
   environment.systemPackages = [ healthcheck ];
 
   # Persistent replacement for the ad-hoc `systemd-run obsidian` used during
@@ -67,11 +66,7 @@ in
       PrivateTmp = true;
       ProtectSystem = "strict";
       ProtectHome = "read-only";
-      RestrictAddressFamilies = [
-        "AF_INET"
-        "AF_INET6"
-        "AF_UNIX"
-      ];
+      RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" ];
     };
   };
 

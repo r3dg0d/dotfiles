@@ -1,12 +1,7 @@
-{
-  pkgs,
-  lib,
-  inputs,
-  ...
-}:
+{ pkgs, lib, ... }:
 let
   # Same revision and locked dependency graph as the existing user-profile install.
-  ambxst = inputs.ambxst;
+  ambxst = builtins.getFlake "github:Axenide/Ambxst/d6a3b7207bdc9591d545ee6cac785446279a5a72?narHash=sha256-5FJ1%2BvvzGEF%2B4YOyUkOY5fCy07XGOx/xdHuxDiCHQZ0%3D";
   system = pkgs.stdenv.hostPlatform.system;
   originalDefault = ambxst.packages.${system}.default;
 
@@ -47,14 +42,14 @@ let
   # this makes startDaemon() defensively clear both before spawning.
   patchedBackend = ambxst.packages.${system}.backend.overrideAttrs (old: {
     postPatch = (old.postPatch or "") + ''
-            substituteInPlace pkg/svc/recorder/service.go \
-              --replace-fail 'args = append(args, "-o", outPath)' \
-                              'args = append(args, "-fallback-cpu-encoding", "yes", "-o", outPath)'
-            substituteInPlace pkg/svc/compositor/proc.go \
-              --replace-fail 'func (m *Manager) startDaemon() error {' \
-                              'func (m *Manager) startDaemon() error {
-      	_ = exec.Command("pkill", "-9", "-f", "axctl.*daemon").Run()
-      	_ = os.Remove(axctlSocketPath())'
+      substituteInPlace pkg/svc/recorder/service.go \
+        --replace-fail 'args = append(args, "-o", outPath)' \
+                        'args = append(args, "-fallback-cpu-encoding", "yes", "-o", outPath)'
+      substituteInPlace pkg/svc/compositor/proc.go \
+        --replace-fail 'func (m *Manager) startDaemon() error {' \
+                        'func (m *Manager) startDaemon() error {
+	_ = exec.Command("pkill", "-9", "-f", "axctl.*daemon").Run()
+	_ = os.Remove(axctlSocketPath())'
     '';
   });
 
@@ -77,8 +72,7 @@ let
       "${originalDefault}/bin/ambxst" > "$out/bin/ambxst"
     chmod +x "$out/bin/ambxst"
   '';
-in
-{
+in {
   # patchedLauncher wins only the bin/ambxst collision (hiPrio); every
   # other file (share/fonts, lib/qt-6/qml, share/applications/
   # ambxst.desktop, and the rest of Ambxst-env's bundled tools, including

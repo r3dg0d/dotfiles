@@ -1,14 +1,8 @@
 { lib, pkgs, ... }:
 {
-  networking.firewall = {
-    enable = true;
-    checkReversePath = "loose";
-  };
+  networking.firewall = { enable = true; checkReversePath = "loose"; };
   services.openssh.enable = false;
-  security.sudo = {
-    wheelNeedsPassword = true;
-    execWheelOnly = true;
-  };
+  security.sudo = { wheelNeedsPassword = true; execWheelOnly = true; };
   boot.loader.systemd-boot.editor = false;
   boot.kernel.sysctl = {
     "kernel.kptr_restrict" = 2;
@@ -33,16 +27,8 @@
     "net.ipv4.tcp_syncookies" = 1;
     "net.ipv4.tcp_rfc1337" = 1;
   };
-  services.journald.settings.Journal = {
-    Storage = "persistent";
-    SystemMaxUse = "1G";
-    RuntimeMaxUse = "256M";
-    MaxRetentionSec = "30day";
-  };
-  nix.settings = {
-    require-sigs = true;
-    trusted-users = [ "root" ];
-  };
+  services.journald.settings.Journal = { Storage = "persistent"; SystemMaxUse = "1G"; RuntimeMaxUse = "256M"; MaxRetentionSec = "30day"; };
+  nix.settings = { require-sigs = true; trusted-users = [ "root" ]; };
   nix.optimise.automatic = true;
   environment.systemPackages = [ pkgs.lynis ];
   # Preserve unprivileged user namespaces, IPv6 autoconfiguration, VPN routing,

@@ -1,4 +1,4 @@
-# The host banner, printed once per interactive terminal.
+# The zionsec banner, printed once per interactive terminal.
 #
 # Everything in it that cannot change without a rebuild is substituted at build
 # time, so the banner is a handful of `echo`s and one `figlet` call rather than
@@ -28,7 +28,7 @@ let
     ) (lib.splitString "-" id);
 
   banner = pkgs.writeShellApplication {
-    name = "host-banner";
+    name = "zionsec-banner";
     runtimeInputs = [
       pkgs.figlet
       pkgs.coreutils
@@ -48,19 +48,19 @@ let
   };
 in
 {
-  # Runnable by hand as `host-banner`, which is also how it is reused below.
+  # Runnable by hand as `zionsec-banner`, which is also how it is reused below.
   environment.systemPackages = [ banner ];
 
   # Interactive shells only (this init block is not read by non-interactive
   # ones), and then only when stdout is really a terminal -- an editor's or an
   # agent's captured shell should not have a banner in its output.
   #
-  # HOST_BANNER_SHOWN is exported, so nested shells inside an already greeted
-  # terminal stay quiet: the banner marks a new terminal, not every `bash` in
-  # it.
+  # ZIONSEC_BANNER_SHOWN is exported, so nested shells inside an already
+  # greeted terminal stay quiet: the banner marks a new terminal, not every
+  # `bash` in it.
   programs.bash.interactiveShellInit = lib.mkAfter ''
-    if [ -z "''${HOST_BANNER_SHOWN:-}" ] && [ -t 1 ]; then
-      export HOST_BANNER_SHOWN=1
+    if [ -z "''${ZIONSEC_BANNER_SHOWN:-}" ] && [ -t 1 ]; then
+      export ZIONSEC_BANNER_SHOWN=1
       ${lib.getExe banner} || true
     fi
   '';

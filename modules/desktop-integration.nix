@@ -10,14 +10,7 @@ let
   # override, or newly installed Flatpaks).
   desktopCacheRefresh = pkgs.writeShellApplication {
     name = "desktop-cache-refresh";
-    runtimeInputs = with pkgs; [
-      ffmpeg
-      gnugrep
-      findutils
-      gtk3
-      desktop-file-utils
-      coreutils
-    ];
+    runtimeInputs = with pkgs; [ ffmpeg gnugrep findutils gtk3 desktop-file-utils coreutils ];
     text = ''
       apps_dir="$HOME/.local/share/applications"
       icon_root="$HOME/.local/share/icons/hicolor"
@@ -69,8 +62,24 @@ let
       update-desktop-database "$apps_dir" >/dev/null 2>&1 || true
     '';
   };
-in
-{
+in {
+  # The ly/start-hyprland session is not managed by UWSM. Hyprland's Lua
+  # startup/shutdown hooks own this target, which keeps portals available.
+  systemd.user.targets.hyprland-session = {
+    description = "Hyprland graphical session";
+    bindsTo = [ "graphical-session.target" ];
+    wants = [ "graphical-session-pre.target" "xdg-desktop-portal.service" ];
+    after = [ "graphical-session-pre.target" ];
+  };
+
+  xdg.portal.config.hyprland = {
+    default = [ "hyprland" "kde" "gtk" ];
+    "org.freedesktop.impl.portal.FileChooser" = [ "gtk" ];
+    "org.freedesktop.impl.portal.AppChooser" = [ "kde" ];
+    "org.freedesktop.impl.portal.Screenshot" = [ "hyprland" ];
+    "org.freedesktop.impl.portal.ScreenCast" = [ "hyprland" ];
+  };
+
   # Also runnable by hand: `desktop-cache-refresh`.
   environment.systemPackages = [ desktopCacheRefresh ];
 

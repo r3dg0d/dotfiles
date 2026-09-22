@@ -105,3 +105,9 @@ publication; `scripts/privacy-scan.py` additionally refuses anything under
 deliberately omits the top bar, whose media widget shows whatever is playing.
 
 See [SYSTEM-AUDIT](docs/SYSTEM-AUDIT.md), [MIGRATION](docs/MIGRATION.md), [PACKAGES](docs/PACKAGES.md), and [VALIDATION](docs/VALIDATION.md).
+
+## Recent workstation modules
+
+- `matrixshot-path` / `privsec-tools-path`: wrappers so Hyprland sessions find `~/.local/bin` tools
+- `discord-clients`: Equibop + Oxicord (unofficial; ToS risk)
+- `helium`, `local-ai-tools`, `pi-coding-agent`, `zed`, `workstation-polish`

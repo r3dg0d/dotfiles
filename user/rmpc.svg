@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- rmpc — beamed eighth notes over a waveform -->
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7ee8a2"/>
+      <stop offset="1" stop-color="#2fae63"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="#14181c"/>
+  <g fill="url(#g)">
+    <!-- note stems and beam -->
+    <path d="M26 14 L48 10 v6 L26 20 z"/>
+    <rect x="26" y="14" width="3.5" height="26" rx="1.75"/>
+    <rect x="44.5" y="10" width="3.5" height="26" rx="1.75"/>
+    <ellipse cx="22" cy="41" rx="7" ry="5.5"/>
+    <ellipse cx="40.5" cy="37" rx="7" ry="5.5"/>
+  </g>
+  <!-- waveform baseline -->
+  <g stroke="#2fae63" stroke-width="2.5" stroke-linecap="round" opacity="0.65">
+    <line x1="10" y1="52" x2="10" y2="48"/>
+    <line x1="16" y1="54" x2="16" y2="46"/>
+    <line x1="22" y1="53" x2="22" y2="51"/>
+    <line x1="34" y1="54" x2="34" y2="46"/>
+    <line x1="46" y1="53" x2="46" y2="49"/>
+    <line x1="52" y1="55" x2="52" y2="45"/>
+  </g>
+</svg>

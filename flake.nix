@@ -8,6 +8,9 @@
     durdraw.inputs.nixpkgs.follows = "nixpkgs";
     ambxst.url = "github:Axenide/Ambxst/d6a3b7207bdc9591d545ee6cac785446279a5a72?narHash=sha256-5FJ1%2BvvzGEF%2B4YOyUkOY5fCy07XGOx/xdHuxDiCHQZ0%3D";
     nix-flatpak.url = "github:gmodena/nix-flatpak/0f392e302963bce69787c495aa95ef1d50dda889?narHash=sha256-8wVBx1J5hR1DzUyzlrm2DkMXx7RJbATh3%2BR%2BqBBILlI%3D";
+    # Unofficial Discord TUI — ToS risk; auth interactively, never bake tokens.
+    oxicord.url = "github:linuxmobile/oxicord/v0.1.9";
+    oxicord.inputs.nixpkgs.follows = "nixpkgs";
   };
   outputs =
     inputs@{ self, nixpkgs, ... }:

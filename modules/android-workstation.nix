@@ -1,32 +1,22 @@
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
+{ config, pkgs, lib, ... }:
 let
-  sdk =
-    (pkgs.androidenv.composeAndroidPackages {
-      numLatestPlatformVersions = 1;
-      buildToolsVersions = [ "latest" ];
-      includeEmulator = true;
-      includeSystemImages = false;
-      includeNDK = false;
-    }).androidsdk;
+  user = config.workstation.username;
+  sdk = (pkgs.androidenv.composeAndroidPackages {
+    numLatestPlatformVersions = 1;
+    buildToolsVersions = [ "latest" ];
+    includeEmulator = true;
+    includeSystemImages = false;
+    includeNDK = false;
+  }).androidsdk;
   gradle9 = pkgs.writeShellScriptBin "gradle9" ''
     exec ${pkgs.gradle_9}/bin/gradle "$@"
   '';
-in
-{
+in {
   nixpkgs.config.android_sdk.accept_license = true;
-  users.users.${config.workstation.username}.extraGroups = [ "kvm" ];
+  users.users.${user}.extraGroups = [ "kvm" ];
   environment.systemPackages = [
-    sdk
-    pkgs.android-tools
-    (pkgs.android-studio.withSdk sdk)
-    pkgs.android-studio-tools
-    pkgs.gradle
-    gradle9
+    sdk pkgs.android-tools (pkgs.android-studio.withSdk sdk)
+    pkgs.android-studio-tools pkgs.gradle gradle9
   ];
   environment.sessionVariables = {
     ANDROID_HOME = "${sdk}/libexec/android-sdk";

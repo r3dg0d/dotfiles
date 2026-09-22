@@ -1,0 +1,5 @@
+{
+  "terminal": "ghostty",
+  "terminalAdvanced": false,
+  "terminalCommand": "$TERMINAL -e $COMMAND"
+}

@@ -7,7 +7,7 @@ rustPlatform.buildRustPackage rec {
     owner = "r3dg0d";
     repo = "matrix";
     rev = "45a9a7d6c36d0563eee401189e2a9ac311a63026";
-    hash = "";
+    hash = "sha256-G7TTFxyIjVqwKe6kgAAuTnwhX7Nxd3V09aaO2DcrGcE=";
   };
 
   cargoLock.lockFile = ./Cargo.lock;

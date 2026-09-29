@@ -21,6 +21,7 @@
     ../../modules/apps-extra.nix
     ../../modules/gaming.nix
     ../../modules/desktop.nix
+    ../../modules/desktop-tools.nix
     ../../modules/ambxst.nix
     ../../modules/music.nix
     ../../modules/user-desktop.nix

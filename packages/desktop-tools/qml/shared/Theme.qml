@@ -30,19 +30,22 @@ Singleton {
 
     function col(name, fallback) { return c[name] !== undefined ? c[name] : fallback; }
 
-    // Matrix / Dotsquared identity tokens (used as fallbacks when Ambxst
+    // Matrix / Dotsquared identity tokens — see config/theme-seeds/zionsec-matrix-tokens.json
+    // (used as fallbacks when Ambxst
     // matugen colours are missing, and as named aliases for QML). Near-black,
     // matrix-green accents, amber warn, red critical — usable, not cheesy.
+    // Canonical seed: config/theme-seeds/zionsec-matrix-tokens.json
     readonly property color matrixBg: "#050805"
     readonly property color matrixSurface: "#0a100c"
-    readonly property color matrixGreen: "#00c853"
+    readonly property color matrixGreen: "#00c853"       // Material primary / soft accent
     readonly property color matrixGreenDim: "#1b5e20"
-    readonly property color matrixGreenSoft: "#69f0ae"
-    readonly property color matrixAmber: "#ffb300"
-    readonly property color matrixRed: "#ff5252"
+    readonly property color matrixGreenSoft: "#69f0ae"   // success
+    readonly property color matrixPhosphor: "#00ff66"    // Ghostty / MatrixShot luminous
+    readonly property color matrixAmber: "#ffb300"       // warn
+    readonly property color matrixRed: "#ff5252"         // critical
     readonly property color matrixCyan: "#18ffff"
     readonly property color matrixBorder: "#1a3d28"
-    readonly property color matrixLuminous: "#00e676"
+    readonly property color matrixLuminous: "#00ff66"    // aligned to phosphor
 
     readonly property bool oled: t.oledMode === true
     readonly property color background: oled ? "#000000" : col("background", matrixBg)

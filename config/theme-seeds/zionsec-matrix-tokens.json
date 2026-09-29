@@ -1,0 +1,76 @@
+{
+  "$schema_comment": "zionsec Matrix × Ambxst DotSquared design tokens. Canonical seed for Ghostty, fuzzel, MatrixShot QS, desktop-tools Theme.qml fallbacks, and Ambxst OLED black. Matugen wallpaper colours still override Ambxst Surfaces when present.",
+  "meta": {
+    "name": "zionsec-matrix-dotsquared",
+    "version": "1.0.0",
+    "host": "zionsec",
+    "preserves": "Ambxst DotSquared (halftone, roundness 0, Terminus UI) + phosphor Matrix accents",
+    "updated": "2026-09-29"
+  },
+  "colors": {
+    "bg": "#050805",
+    "bgOled": "#000000",
+    "surface": "#0a100c",
+    "surfaceRaised": "#0f1812",
+    "surfaceHigh": "#152019",
+    "surfaceBright": "#1c2a22",
+    "border": "#1a3d28",
+    "borderMuted": "#1f5f1f",
+    "phosphor": "#00ff66",
+    "phosphorDim": "#00cc55",
+    "phosphorSoft": "#7dff9a",
+    "phosphorText": "#b8ffb8",
+    "primary": "#00c853",
+    "primaryDim": "#1b5e20",
+    "success": "#69f0ae",
+    "warn": "#ffb300",
+    "critical": "#ff5252",
+    "criticalSoft": "#ff8888",
+    "cyan": "#18ffff",
+    "fg": "#d8ffe8",
+    "fgDim": "#8fb89a",
+    "panel": "#f0080c08",
+    "overlay": "#cc050805",
+    "selectionBg": "#003318",
+    "selectionFg": "#baffda"
+  },
+  "typography": {
+    "uiFont": "Terminus",
+    "uiFontSize": 12,
+    "monoFont": "Terminus",
+    "monoFontSize": 12,
+    "barFont": "JetBrainsMono Nerd Font",
+    "barFontSize": 13,
+    "launcherFont": "JetBrainsMono Nerd Font",
+    "launcherFontSize": 13,
+    "terminalFont": "JetBrainsMono Nerd Font Mono",
+    "terminalFontSize": 10,
+    "iconsFont": "Phosphor-Bold"
+  },
+  "borders": {
+    "width": 1,
+    "radius": 0,
+    "luminous": "#00ff66"
+  },
+  "motion": {
+    "animDurationMs": 300,
+    "note": "Keep Ambxst DotSquared 300ms; avoid heavy GPU animations / CRT outside Ghostty shader"
+  },
+  "surfaces_ambxst": {
+    "roundness": 0,
+    "oledMode": true,
+    "gradientTypePreferred": "halftone",
+    "tintIcons": false,
+    "enableCorners": true
+  },
+  "roles": {
+    "ghostty_fg": "phosphor",
+    "matrixshot_accent": "phosphor",
+    "fuzzel_accent": "phosphor",
+    "desktop_tools_primary_fallback": "primary",
+    "desktop_tools_ok": "success",
+    "desktop_tools_warning": "warn",
+    "desktop_tools_error": "critical",
+    "ambxst_matugen": "wallpaper-driven; tokens are fallbacks + Cross-app accents"
+  }
+}

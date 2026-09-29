@@ -1,7 +1,8 @@
 # zionsec — green phosphor CRT theme for Ghostty.
-# Source of truth: /home/neo/nixos-workstation/user/ghostty/config.ghostty
-# (symlinked declaratively to ~/.config/ghostty/config.ghostty by
-# modules/user-desktop.nix — edit this file and rebuild, not the symlink).
+# Tokens: config/theme-seeds/zionsec-matrix-tokens.json (phosphor #00ff66, OLED bg).
+# Source of truth: user/ghostty/config.ghostty (dotfiles + /etc/nixos mirror).
+# Live path ~/.config/ghostty/config.ghostty is a tmpfiles symlink via
+# modules/user-desktop.nix — edit this file and rebuild, not the symlink.
 
 # --- Font -------------------------------------------------------------
 # JetBrainsMono Nerd Font is already installed system-wide

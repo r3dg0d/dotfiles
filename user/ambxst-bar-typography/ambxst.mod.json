@@ -1,0 +1,23 @@
+{
+  "manifestVersion": 1,
+  "id": "com.zionsec.bar-typography",
+  "name": "Workstation bar typography (Matrix)",
+  "version": "1.1.0",
+  "description": "JetBrainsMono Nerd Font at 13px for bar labels; preserves Phosphor icons, DotSquared Terminus popups, Matrix cohesion with fuzzel/Ghostty.",
+  "license": "MIT",
+  "author": "Workstation configuration",
+  "compatibility": {
+    "api": 1,
+    "ambxst": ">=1.3.4 <1.4.0",
+    "testedBaseCommits": [
+      "3705f278f24a74718fc23772b47044e96701d53a"
+    ]
+  },
+  "permissions": [],
+  "operations": [
+    {
+      "type": "patch",
+      "source": "patches/bar-typography.patch"
+    }
+  ]
+}

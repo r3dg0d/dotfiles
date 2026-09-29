@@ -1,0 +1,161 @@
+--- a/modules/bar/workspaces/Workspaces.qml
++++ b/modules/bar/workspaces/Workspaces.qml
+@@ -130,7 +130,7 @@
+     function workspaceLabelFontSize(value) {
+         const label = String(value);
+         const shrink = label.length > 1 && label !== "10" ? (label.length - 1) * 2 : 0;
+-        return Math.round(Math.max(1, Config.theme.fontSize - shrink));
++        return Math.round(Math.max(1, 13 - shrink));
+     }
+ 
+     function getWorkspaceId(index) {
+@@ -485,7 +485,7 @@
+                         anchors.centerIn: parent
+                         horizontalAlignment: Text.AlignHCenter
+                         verticalAlignment: Text.AlignVCenter
+-                        font.family: Config.theme.font
++                        font.family: "JetBrainsMono Nerd Font"
+                         font.pixelSize: workspaceLabelFontSize(text)
+                         text: `${button.workspaceValue}`
+                         elide: Text.ElideRight
+@@ -622,7 +622,7 @@
+                         anchors.centerIn: parent
+                         horizontalAlignment: Text.AlignHCenter
+                         verticalAlignment: Text.AlignVCenter
+-                        font.family: Config.theme.font
++                        font.family: "JetBrainsMono Nerd Font"
+                         font.pixelSize: workspaceLabelFontSize(text)
+                         text: `${buttonVert.workspaceValue}`
+                         elide: Text.ElideRight
+--- a/modules/bar/clock/Clock.qml
++++ b/modules/bar/clock/Clock.qml
+@@ -76,9 +76,9 @@
+                 id: dayDisplay
+                 text: root.weatherAvailable ? WeatherService.weatherSymbol : root.currentDayAbbrev
+                 color: root.popupOpen ? buttonBg.item : Colors.overBackground
+-                font.pixelSize: root.weatherAvailable ? 16 : Config.theme.fontSize
+-                font.family: root.weatherAvailable ? Config.theme.font : Config.theme.font
+-                font.bold: !root.weatherAvailable
++                font.pixelSize: root.weatherAvailable ? 16 : 13
++                font.family: "JetBrainsMono Nerd Font"
++                font.weight: Font.Medium
+             }
+ 
+             Separator {
+@@ -90,9 +90,9 @@
+                 id: timeDisplay
+                 text: root.currentTime
+                 color: root.popupOpen ? buttonBg.item : Colors.overBackground
+-                font.pixelSize: Config.theme.fontSize
+-                font.family: Config.theme.font
+-                font.bold: true
++                font.pixelSize: 13
++                font.family: "JetBrainsMono Nerd Font"
++                font.weight: Font.Medium
+             }
+         }
+ 
+@@ -107,9 +107,9 @@
+                 id: dayDisplayV
+                 text: root.weatherAvailable ? WeatherService.weatherSymbol : root.currentDayAbbrev
+                 color: root.popupOpen ? buttonBg.item : Colors.overBackground
+-                font.pixelSize: root.weatherAvailable ? 16 : Config.theme.fontSize
+-                font.family: Config.theme.font
+-                font.bold: !root.weatherAvailable
++                font.pixelSize: root.weatherAvailable ? 16 : 13
++                font.family: "JetBrainsMono Nerd Font"
++                font.weight: Font.Medium
+                 horizontalAlignment: Text.AlignHCenter
+                 wrapMode: Text.NoWrap
+                 Layout.alignment: Qt.AlignHCenter
+@@ -125,9 +125,9 @@
+                 id: hoursDisplayV
+                 text: root.currentHours
+                 color: root.popupOpen ? buttonBg.item : Colors.overBackground
+-                font.pixelSize: Config.theme.fontSize
+-                font.family: Config.theme.font
+-                font.bold: true
++                font.pixelSize: 13
++                font.family: "JetBrainsMono Nerd Font"
++                font.weight: Font.Medium
+                 horizontalAlignment: Text.AlignHCenter
+                 wrapMode: Text.NoWrap
+                 Layout.alignment: Qt.AlignHCenter
+@@ -137,9 +137,9 @@
+                 id: minutesDisplayV
+                 text: root.currentMinutes
+                 color: root.popupOpen ? buttonBg.item : Colors.overBackground
+-                font.pixelSize: Config.theme.fontSize
+-                font.family: Config.theme.font
+-                font.bold: true
++                font.pixelSize: 13
++                font.family: "JetBrainsMono Nerd Font"
++                font.weight: Font.Medium
+                 horizontalAlignment: Text.AlignHCenter
+                 wrapMode: Text.NoWrap
+                 Layout.alignment: Qt.AlignHCenter
+--- a/modules/bar/clock/Weather.qml
++++ b/modules/bar/clock/Weather.qml
+@@ -43,8 +43,8 @@
+             text: weatherContainer.weatherSymbol
+             color: Colors.overBackground
+             font.pixelSize: 16
+-            font.family: Config.theme.font
+-            font.bold: true
++            font.family: "JetBrainsMono Nerd Font"
++            font.weight: Font.Medium
+             layer.enabled: true
+             layer.effect: Shadow {}
+         }
+@@ -58,9 +58,9 @@
+             id: tempDisplay
+             text: weatherContainer.weatherTemp
+             color: Colors.overBackground
+-            font.pixelSize: Config.theme.fontSize
+-            font.family: Config.theme.font
+-            font.bold: true
++            font.pixelSize: 13
++            font.family: "JetBrainsMono Nerd Font"
++            font.weight: Font.Medium
+         }
+     }
+ 
+@@ -76,8 +76,8 @@
+             text: weatherContainer.weatherSymbol
+             color: Colors.overBackground
+             font.pixelSize: 16
+-            font.family: Config.theme.font
+-            font.bold: true
++            font.family: "JetBrainsMono Nerd Font"
++            font.weight: Font.Medium
+             horizontalAlignment: Text.AlignHCenter
+             wrapMode: Text.NoWrap
+             Layout.alignment: Qt.AlignHCenter
+@@ -93,9 +93,9 @@
+             id: tempDisplayV
+             text: weatherContainer.vertical && weatherContainer.weatherTemp.length > 0 ? weatherContainer.weatherTemp.slice(0, -1) : weatherContainer.weatherTemp
+             color: Colors.overBackground
+-            font.pixelSize: Config.theme.fontSize
+-            font.family: Config.theme.font
+-            font.bold: true
++            font.pixelSize: 13
++            font.family: "JetBrainsMono Nerd Font"
++            font.weight: Font.Medium
+             horizontalAlignment: Text.AlignHCenter
+             wrapMode: Text.NoWrap
+             Layout.alignment: Qt.AlignHCenter
+--- a/modules/widgets/defaultview/CompactPlayer.qml
++++ b/modules/widgets/defaultview/CompactPlayer.qml
+@@ -134,9 +134,9 @@
+             anchors.centerIn: parent
+             width: parent.width - 32
+             text: compactPlayer.displayedTitle
+-            font.family: Config.theme.font
+-            font.pixelSize: Styling.fontSize(0)
+-            font.bold: true
++            font.family: "JetBrainsMono Nerd Font"
++            font.pixelSize: 13
++            font.weight: Font.Medium
+             color: Colors.overBackground
+             elide: Text.ElideRight
+             visible: opacity > 0

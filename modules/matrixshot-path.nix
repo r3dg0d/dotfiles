@@ -1,18 +1,29 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 let
   home = config.workstation.homeDirectory;
+  projectsSrc = /. + "${home}/Projects/MatrixShot";
+  packaged =
+    if builtins.pathExists (projectsSrc + "/packaging/nix/package.nix")
+    then pkgs.callPackage (projectsSrc + "/packaging/nix/package.nix") {
+      matrixshotSrc = projectsSrc;
+    }
+    else null;
   wrap = name: pkgs.writeShellScriptBin name ''
     exec ${home}/.local/bin/${name} "$@"
   '';
 in {
-  # MatrixShot / KeystrokeNoise currently ship as user-built binaries under
-  # ~/.local/bin. Display-manager sessions often lack that directory on PATH,
-  # so Print Screen binds fail silently. Put stable wrappers on the system
-  # profile; the real binaries stay in ~/.local/bin until packaged.
-  environment.systemPackages = [
-    (wrap "matrixshot")
-    (wrap "matrixshot-preview")
-    (wrap "matrixshot-edit")
-    (wrap "keystroke-noise")
-  ];
+  # MatrixShot: real package from Projects when available; else ~/.local/bin
+  # wrappers. `nixos-rebuild switch` required for system profile update.
+  environment.systemPackages =
+    if packaged != null then [
+      packaged
+      (wrap "keystroke-noise")
+    ] else [
+      (wrap "matrixshot")
+      (wrap "matrixshot-preview")
+      (wrap "matrixshot-edit")
+      (wrap "matrixshot-rec-ui")
+      (wrap "matrixshot-ui")
+      (wrap "keystroke-noise")
+    ];
 }

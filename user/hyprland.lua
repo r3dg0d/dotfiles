@@ -353,8 +353,8 @@ hl.bind(mainMod .. " + SHIFT + P", hl.dsp.exec_cmd("nohup ambxst colorpicker >/d
 
 -- PrintScreen aliases for the capture actions above (same underlying
 -- commands, no duplicated implementation).
--- MatrixShot owns Print (region capture). Ambxst toolbox remains on SUPER+S / SUPER+SHIFT+S / SUPER+SHIFT+R.
-hl.bind("Print",             hl.dsp.exec_cmd("/home/neo/.local/bin/matrixshot region"))
+-- MatrixShot owns Print (region → chooser: Screenshot | Screen Record). Ambxst toolbox remains on SUPER+S / SUPER+SHIFT+S / SUPER+SHIFT+R.
+hl.bind("Print",             hl.dsp.exec_cmd("/home/neo/.local/bin/matrixshot choose"))
 hl.bind("SHIFT + Print",     hl.dsp.exec_cmd("/home/neo/.local/bin/matrixshot folder"))
 hl.bind("CTRL + Print",      hl.dsp.exec_cmd("/home/neo/.local/bin/matrixshot fullscreen"))
 hl.bind("CTRL + SHIFT + Print", hl.dsp.exec_cmd("/home/neo/.local/bin/matrixshot record toggle"))

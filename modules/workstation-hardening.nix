@@ -1,5 +1,8 @@
 { lib, pkgs, ... }:
 {
+  # Default-deny firewall. Service modules open ports next to the service that
+  # needs them (today: Jellyfin via modules/jellyfin.nix openFirewall).
+  # checkReversePath = "loose" preserves Mullvad/VPN and virt routing.
   networking.firewall = { enable = true; checkReversePath = "loose"; };
   services.openssh.enable = false;
   security.sudo = { wheelNeedsPassword = true; execWheelOnly = true; };

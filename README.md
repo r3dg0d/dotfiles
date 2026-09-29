@@ -50,6 +50,9 @@ Hyprland with the Ambxst shell and its horizontal scrolling layout, on the
 Ghostty with the green phosphor CRT shader from `config/ghostty`, showing the
 per-terminal host banner from `modules/shell-greeting.nix`.
 
+Optional terminal flair: the `matrix` digital-rain CLI (`modules/matrix-cli.nix`,
+package under `packages/matrix`) — same green aesthetic, no compositor overlays.
+
 ### Application launcher
 
 ![Application launcher](assets/screenshots/application-launcher.png)

@@ -90,6 +90,8 @@ Future system edits belong in **`/etc/nixos`**. Sync intentional public-safe pie
 
 - Login shell: bash
 - Banner: `zionsec-banner` via `modules/shell-greeting.nix` (`programs.bash.interactiveShellInit`)
+- Matrix CLI: `matrix` digital rain (`modules/matrix-cli.nix` → `packages/matrix`) — optional, tasteful; not a desktop overlay
+- Greeter: SDDM theme `matrix-code-rain` (`modules/login-manager.nix`)
 - Terminal: Ghostty (config under `/etc/nixos/user/ghostty/`)
 - No Starship observed in NixOS modules
 - Ambxst can launch tmux (`ambxst run tmux`)
@@ -119,10 +121,17 @@ Future system edits belong in **`/etc/nixos`**. Sync intentional public-safe pie
 ## Privacy / networking
 
 - NetworkManager
-- Firewall enabled (`workstation-hardening.nix`), SSH **disabled**
+- Firewall enabled (`workstation-hardening.nix`), SSH **disabled**, sudo wheel password + `execWheelOnly`
+- Sysctl hardening set in the same module (kptr/dmesg/yama/bpf/protected_* / redirect & source-route off)
+- Intentional LAN hole: Jellyfin `openFirewall` (TCP 8096/8920, UDP 1900/7359) — see Phase 6 audit
+- CUPS/printing: not installed
+- Bluetooth: enabled; typically not discoverable/pairable at rest
 - Mullvad VPN (daemon + GUI; no account in config)
 - Lokinet + Firefox/Helium loki-related modules
 - Tor Browser via Flatpak
+- Secrets: keep `~/.config/vmtools/secrets.env` at mode `0600`, never in git (see `docs/PRIVACY.md`)
+- Live vs mirror: `/etc/nixos` hardcodes `neo`; publish tree uses `modules/identity.nix` — hardening/greeting/login/matrix-cli stay identical
+- Full Phase 6 audit (local inventory): `~/Projects/_megaprompt-inventory/PHASE6-SECURITY-AUDIT.md`
 
 ## System services (notable)
 

@@ -4,7 +4,10 @@ Only explicitly selected configuration is eligible for Git. `.gitignore` is a gu
 
 ## Secrets strategy
 
-Application credentials remain under private user state with restrictive permissions, provided at runtime. No age/SOPS key, encrypted secret, SSH key, password/hash, token or certificate is managed here. A future sops-nix/agenix adoption needs a separate design and must keep decryption identities private.
+Application credentials remain under private user state with restrictive permissions, provided at runtime.
+
+Workstation pattern already in use: `~/.config/vmtools/secrets.env` must stay mode `0600`, owned by the workstation user, listed in the consuming project's `.gitignore`, and never copied into `/etc/nixos` or this repository. Do not `cat` or paste its contents into tickets, chat, or build logs.
+ No age/SOPS key, encrypted secret, SSH key, password/hash, token or certificate is managed here. A future sops-nix/agenix adoption needs a separate design and must keep decryption identities private.
 
 Obsidian MCP expects a private `~/.config/obsidian-mcp/environment` and `ca.pem`. The environment should supply `OBSIDIAN_API_KEY`, `OBSIDIAN_HOST`, `OBSIDIAN_PORT`, and `OBSIDIAN_CA_BUNDLE` pointing to a trusted local certificate. Generate the API key and certificate through your local Obsidian plugin; restrict the environment file to the owning user. Do not paste real values into Nix, Git, documentation or build logs. Loopback addresses appearing in modules are local service defaults, not a private network map. The package import test uses an explicitly inert placeholder, not a login credential.
 

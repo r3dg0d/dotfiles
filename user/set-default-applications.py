@@ -1,7 +1,7 @@
 import configparser,json,os,sys
 from pathlib import Path
 associations=json.loads(Path(sys.argv[1]).read_text())
-path=Path('/home/neo/.config/mimeapps.list')
+path=Path(os.environ.get('XDG_CONFIG_HOME') or Path.home() / '.config') / 'mimeapps.list'
 config=configparser.ConfigParser(interpolation=None,strict=False)
 config.optionxform=str
 if path.exists(): config.read(path)

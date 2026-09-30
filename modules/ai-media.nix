@@ -1,4 +1,4 @@
-{ config, config, lib, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 let
   home = config.workstation.homeDirectory;
   user = config.workstation.username;

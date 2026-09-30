@@ -57,6 +57,7 @@
           ''
             luac -p ${./config/hyprland.lua}
             python ${./scripts/check-json.py} ${./config}
+            python ${self}/scripts/test-default-applications.py
             python ${self}/scripts/test-privacy-scan.py
             python ${self}/scripts/privacy-scan.py
             gitleaks dir ${self} --config ${./.gitleaks.toml} --redact --no-banner

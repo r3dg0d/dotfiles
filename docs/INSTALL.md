@@ -69,6 +69,12 @@ The configuration creates the selected user but contains no password/hash. On a 
 - Select a redistributable or personal wallpaper locally. None is bundled.
 - The Flatpak service installs the declared applications after networking is available; this can take time and is not pinned to exact Flatpak commits.
 
+Default MIME associations are applied as `workstation.username` under
+`workstation.homeDirectory/.config`. The helper honors `XDG_CONFIG_HOME` when
+run separately, falling back to the current user's `~/.config`. No original
+workstation home path is required. `nix flake check` tests this with temporary
+home and config directories, without changing your live associations.
+
 ## User files and backups
 
 Existing live files were not modified by this migration. Future activation uses existing NixOS `L+` tmpfiles rules for Hyprland, Ghostty, GTK cursor settings and rmpc: **these replace destination files/symlinks**. Back up those paths before the first deployment on another machine. Ambxst JSON/binds and GTK/Qt color seeds instead use `C` rules, which leave existing destinations untouched. Edit and deliberately copy revised seeds when you want them applied to an existing account; a normal rebuild is not a theme reset.

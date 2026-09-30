@@ -56,6 +56,8 @@
           }
           ''
             luac -p ${./config/hyprland.lua}
+            luac -p ${./user/hyprland.lua}
+            lua ${self}/scripts/test-desktop-paths.lua ${./user/hyprland.lua}
             python ${./scripts/check-json.py} ${./config}
             python ${self}/scripts/test-default-applications.py
             python ${self}/scripts/test-privacy-scan.py

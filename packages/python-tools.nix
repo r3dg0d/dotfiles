@@ -43,7 +43,7 @@ in {
         --replace-fail 'verify_ssl: bool = False' 'verify_ssl: bool = True' \
         --replace-fail 'self.verify_ssl = verify_ssl' 'self.verify_ssl = os.environ.get("OBSIDIAN_CA_BUNDLE") or verify_ssl'
     '';
-    env.OBSIDIAN_API_KEY = "build-import-check-placeholder";
+    env.OBSIDIAN_API_KEY = "build-time-placeholder-not-a-secret";
     pythonImportsCheck = [ "mcp_obsidian" ];
   };
 }

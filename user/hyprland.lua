@@ -82,7 +82,8 @@ hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
 hl.env("XCURSOR_THEME", "Bibata-Modern-Classic")
 hl.env("HYPRCURSOR_THEME", "Bibata-Modern-Classic")
-hl.env("PATH", "/home/neo/.local/bin:" .. (os.getenv("PATH") or "/run/current-system/sw/bin"))
+local home = assert(os.getenv("HOME"), "HOME must be set for the desktop session")
+hl.env("PATH", home .. "/.local/bin:" .. (os.getenv("PATH") or "/run/current-system/sw/bin"))
 
 
 -----------------------
@@ -347,19 +348,19 @@ hl.bind(mainMod .. " + SHIFT + A",     hl.dsp.exec_cmd("ambxst run lens"))
 -- (Screenshot.captureMode = "ocr", GlobalStates.mirrorWindowVisible) with
 -- no IpcHandler, qs ipc target, or CLI verb reaching them, so SUPER + W and
 -- SUPER + SHIFT + O are intentionally left unbound. See the chat report.
-hl.bind(mainMod .. " + ALT + S", hl.dsp.exec_cmd("nohup xdg-open '/home/neo/Pictures/Screenshots' >/dev/null 2>&1 &"))
-hl.bind(mainMod .. " + ALT + R", hl.dsp.exec_cmd("nohup xdg-open '/home/neo/Videos/Recordings' >/dev/null 2>&1 &"))
+hl.bind(mainMod .. " + ALT + S", hl.dsp.exec_cmd("nohup xdg-open \"$HOME/Pictures/Screenshots\" >/dev/null 2>&1 &"))
+hl.bind(mainMod .. " + ALT + R", hl.dsp.exec_cmd("nohup xdg-open \"$HOME/Videos/Recordings\" >/dev/null 2>&1 &"))
 hl.bind(mainMod .. " + SHIFT + P", hl.dsp.exec_cmd("nohup ambxst colorpicker >/dev/null 2>&1 &"))
 
 -- PrintScreen aliases for the capture actions above (same underlying
 -- commands, no duplicated implementation).
 -- MatrixShot owns Print (region → chooser: Screenshot | Screen Record). Ambxst toolbox remains on SUPER+S / SUPER+SHIFT+S / SUPER+SHIFT+R.
-hl.bind("Print",             hl.dsp.exec_cmd("/home/neo/.local/bin/matrixshot choose"))
-hl.bind("SHIFT + Print",     hl.dsp.exec_cmd("/home/neo/.local/bin/matrixshot folder"))
-hl.bind("CTRL + Print",      hl.dsp.exec_cmd("/home/neo/.local/bin/matrixshot fullscreen"))
-hl.bind("CTRL + SHIFT + Print", hl.dsp.exec_cmd("/home/neo/.local/bin/matrixshot record toggle"))
+hl.bind("Print",             hl.dsp.exec_cmd("matrixshot choose"))
+hl.bind("SHIFT + Print",     hl.dsp.exec_cmd("matrixshot folder"))
+hl.bind("CTRL + Print",      hl.dsp.exec_cmd("matrixshot fullscreen"))
+hl.bind("CTRL + SHIFT + Print", hl.dsp.exec_cmd("matrixshot record toggle"))
 -- KeystrokeNoise toggle (SUPER + SHIFT + period). SUPER+SHIFT+R stays Ambxst screenrecord.
-hl.bind(mainMod .. " + SHIFT + PERIOD", hl.dsp.exec_cmd("/home/neo/.local/bin/keystroke-noise toggle"))
+hl.bind(mainMod .. " + SHIFT + PERIOD", hl.dsp.exec_cmd("keystroke-noise toggle"))
 
 -- Move focus with mainMod + arrow keys
 hl.bind(mainMod .. " + left",  hl.dsp.layout("focus l"))

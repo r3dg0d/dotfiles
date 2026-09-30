@@ -42,6 +42,30 @@ SCREENSHOT_MAGIC = b"\x89PNG\r\n\x1a\n"
 SCREENSHOT_LIMIT = 2 * 1024 * 1024
 
 
+# Reviewed public constants, scoped to a category, repository path and full line.
+# Anchoring prevents a new value or an extra credential from inheriting a review.
+REVIEWED_LINES = {
+    ("modules/ai-media.nix", "personal-home-path"): [
+        r'^"\$\{aiRoot\}/alltalk/outputs:/h[o]me/alltalk/outputs"$',
+        r'^"\$\{aiRoot\}/alltalk/voices:/h[o]me/alltalk/voices"$',
+        r'^"\$\{aiRoot\}/alltalk/rvc_voices:/h[o]me/alltalk/models/rvc_voices"$',
+    ],
+    ("modules/apple-virtualization.nix", "ip-or-version-needs-review"): [
+        r"^# It uses 192\.168\.122\.0/24, which is why iosvm's reverse-tethering subnet$",
+        r"^# defaults to 192\.168\.178\.0/24 instead -- the two must not overlap\.$",
+    ],
+    ("packages/helium-bin.nix", "ip-or-version-needs-review"): [
+        r'^version = "0\.17\.0\.1";$',
+        r'^url = "https://github\.com/imputnet/helium-linux/releases/download/0\.17\.0\.1/helium-0\.17\.0\.1-x86_64_linux\.tar\.xz";$',
+    ],
+}
+
+
+def is_reviewed_line(path, category, line):
+    return any(re.fullmatch(pattern, line.strip())
+               for pattern in REVIEWED_LINES.get((path, category), []))
+
+
 def is_reviewed_screenshot(path, data):
     return (path.parent.as_posix() == SCREENSHOT_DIRECTORY and path.suffix == ".png"
             and data.startswith(SCREENSHOT_MAGIC))
@@ -91,12 +115,14 @@ def scan(name, data):
                 address = ipaddress.ip_address(match.group())
             except ValueError:
                 continue
-            if str(address) not in {"127.0.0.1", "0.0.0.0"}:
+            if (not address.is_loopback and str(address) != "0.0.0.0"
+                    and not is_reviewed_line(path.as_posix(), "ip-or-version-needs-review", line)):
                 findings.append((number, "ip-or-version-needs-review"))
         # Reject concrete personal home paths; dynamic interpolation and the
         # documented neutral account are allowed.
         for match in re.finditer(r"/(?:home|Users)/([A-Za-z_][A-Za-z0-9_.-]*)", line):
-            if match.group(1) != "user":
+            if (match.group(1) != "user"
+                    and not is_reviewed_line(path.as_posix(), "personal-home-path", line)):
                 findings.append((number, "personal-home-path"))
     return findings, keyword_lines
 

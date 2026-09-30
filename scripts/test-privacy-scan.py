@@ -45,6 +45,28 @@ class PrivacyTests(unittest.TestCase):
         self.assertTrue(scanner.scan("assets/screenshots/notes.png", b"plain text pretending to be a screenshot")[0])
         self.assertTrue(scanner.scan("config/desktop.png", png)[0])
 
+    def test_loopback_range_is_public_configuration(self):
+        loopback = ".".join(["127", "3", "2", "1"])
+        external = ".".join(["203", "0", "113", "7"])
+        self.assertEqual(scanner.scan("module.nix", loopback.encode())[0], [])
+        self.assertTrue(scanner.scan("module.nix", external.encode())[0])
+
+    def test_reviewed_lines_are_exact_and_scoped(self):
+        root = Path(__file__).resolve().parents[1]
+        for (name, category), patterns in scanner.REVIEWED_LINES.items():
+            lines = (root / name).read_text().splitlines()
+            for pattern in patterns:
+                matches = [line for line in lines if scanner.re.fullmatch(pattern, line.strip())]
+                self.assertEqual(len(matches), 1, (name, pattern))
+                line = matches[0]
+                with self.subTest(name=name, pattern=pattern):
+                    self.assertFalse(scanner.scan(name, line.encode())[0])
+                    self.assertTrue(scanner.scan("unreviewed.nix", line.encode())[0])
+                    self.assertTrue(scanner.scan(name, (line + " changed").encode())[0])
+                    sensitive = line + ' API_' + 'KEY = "synthetic-sensitive-value"'
+                    findings, _ = scanner.scan(name, sensitive.encode())
+                    self.assertTrue(any(kind == "credential-assignment" for _, kind in findings))
+
     def test_index_and_history_are_not_worktree(self):
         with tempfile.TemporaryDirectory() as directory:
             old_root = scanner.ROOT

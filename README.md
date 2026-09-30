@@ -67,7 +67,7 @@ Read [INSTALL](docs/INSTALL.md) before activation. The public `workstation` outp
 
 ```sh
 nix flake show
-nix flake check
+nix flake check --no-update-lock-file
 nix fmt
 nix develop
 ```
@@ -114,3 +114,10 @@ See [SYSTEM-AUDIT](docs/SYSTEM-AUDIT.md), [MIGRATION](docs/MIGRATION.md), [PACKA
 - `matrixshot-path` / `privsec-tools-path`: wrappers so Hyprland sessions find `~/.local/bin` tools
 - `discord-clients`: Equibop + Oxicord (unofficial; ToS risk)
 - `helium`, `local-ai-tools`, `pi-coding-agent`, `zed`, `workstation-polish`
+
+
+CI evaluates the workstation and runs the native configuration checks without
+activating a system. These cover Lua syntax and portable desktop bindings, JSON,
+MIME association behavior, publication-scanner regressions, and secret scanning.
+The complete input graph is locked; missing input pins fail the CI check rather
+than being silently resolved.

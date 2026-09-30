@@ -26,3 +26,18 @@ The private deployment wrapper lives in a sibling directory with restricted dire
 The flake check also runs pinned Gitleaks with its default rules. `.gitleaks.toml` extends those rules with one narrow, reviewed exception: the exact `XF86Calculator` key symbol in `config/ambxst/binds.json` is not an API key. Both the path and exact value must match; the file and generic API-key rule are not globally excluded. This follows Gitleaks' [rule-specific allowlist configuration](https://github.com/gitleaks/gitleaks#configuration).
 
 The local heuristic scanner separately covers all UTF-8 files, including formats Gitleaks may ignore by default, and rejects unexpected binaries and files larger than 256 KiB. Identifier searches and human review supplement token detection. No scanner establishes copyright or proves the absence of secrets.
+
+
+## Reviewed public constants
+
+The publication scanner reports concrete personal home paths and network-looking
+values. Desktop launchers now derive the account home from `HOME`; local
+MatrixShot source packaging requires an explicit `matrixshotSrc` argument.
+
+The scanner recognizes the IPv4 loopback range and records narrowly scoped,
+full-line reviews for AllTalk's internal container mount paths, the documented
+libvirt/reverse-tethering example subnets, and Helium's pinned release version.
+These reviews match the repository file, finding category, and complete line.
+Changing a reviewed line or moving it to another file requires review again.
+Regression tests ensure appended credentials remain findings. Secret detection,
+unreviewed personal paths, and unreviewed network values remain enabled.

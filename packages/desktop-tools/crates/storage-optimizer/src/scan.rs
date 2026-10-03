@@ -461,6 +461,11 @@ fn walk_entries(sh: &Shared, acc: &mut Acc, entries: Vec<fs::DirEntry>, dev: u64
     st
 }
 
+/// Whether a Large Item may be moved to Trash from the UI.
+fn item_trashable(anchor_trashable: bool, protected: bool, tool_managed: bool, kind: &str, class: &str) -> bool {
+    anchor_trashable && !protected && !tool_managed && (kind == "file" || class == "Reproducible Build")
+}
+
 fn record_item(sh: &Shared, acc: &mut Acc, p: &Path, ctx: &Ctx, a: &Anchor, s: DirStat, kind: &str) {
     let path = p.to_string_lossy().into_owned();
     if sh.ignored.contains(&path) {
@@ -474,8 +479,7 @@ fn record_item(sh: &Shared, acc: &mut Acc, p: &Path, ctx: &Ctx, a: &Anchor, s: D
     }
     // Deletion is only ever offered for a single ordinary file, or for a
     // recognised reproducible build directory — and never inside protected data.
-    let trashable = a.trashable && ctx.protected.is_none() && ctx.tool.is_none()
-        && (kind == "file" || class == "Reproducible Build");
+    let trashable = item_trashable(a.trashable, ctx.protected.is_some(), ctx.tool.is_some(), kind, class);
     acc.items.push(json!({
         "path": path,
         "name": a.label.clone().unwrap_or_else(|| p.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default()),
@@ -943,4 +947,70 @@ pub fn summary(cfg: &Config, cfg_err: Option<String>) -> Value {
         "widget": cfg.widget, "rescanOnOpenAfterHours": cfg.scan.rescan_on_open_after_hours,
         "error": cfg_err,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_size_handles_decimal_and_binary_units() {
+        assert_eq!(parse_size("4.147GB"), 4_147_000_000);
+        assert_eq!(parse_size("343.4MB"), 343_400_000);
+        assert_eq!(parse_size("4.096kB"), 4_096);
+        assert_eq!(parse_size("1GiB"), 1_073_741_824);
+        assert_eq!(parse_size("512B"), 512);
+        assert_eq!(parse_size("0"), 0);
+        assert_eq!(parse_size("not-a-size"), 0);
+    }
+
+    #[test]
+    fn ext_of_lowercases_suffix() {
+        assert_eq!(ext_of("model.Safetensors"), "safetensors");
+        assert_eq!(ext_of("noext"), "");
+        assert_eq!(ext_of("archive.tar.gz"), "gz");
+    }
+
+    #[test]
+    fn is_model_file_respects_ambiguous_context() {
+        let mut ctx = Ctx { cat: "misc", ..Default::default() };
+        assert!(is_model_file(&ctx, "weights.safetensors"));
+        assert!(is_model_file(&ctx, "llama.gguf"));
+        assert!(!is_model_file(&ctx, "payload.bin")); // ambiguous outside AI
+        ctx.cat = "ai-models";
+        assert!(is_model_file(&ctx, "payload.bin"));
+        ctx.cat = "misc";
+        ctx.in_models_dir = true;
+        assert!(is_model_file(&ctx, "payload.bin"));
+    }
+
+    #[test]
+    fn item_trashable_safe_vs_protected() {
+        assert!(item_trashable(true, false, false, "file", "Personal"));
+        assert!(item_trashable(true, false, false, "dir", "Reproducible Build"));
+        // directories that are not build outputs are never trashable
+        assert!(!item_trashable(true, false, false, "dir", "Model"));
+        assert!(!item_trashable(true, true, false, "file", "Personal")); // protected
+        assert!(!item_trashable(true, false, true, "file", "Model")); // tool-managed
+        assert!(!item_trashable(false, false, false, "file", "Personal")); // anchor says no
+    }
+
+    #[test]
+    fn file_class_maps_categories() {
+        let rules = Rules {
+            home: PathBuf::from("/tmp"),
+            xdg: Default::default(),
+            vaults: vec![],
+            exclude: vec![],
+            threshold: 1_000_000_000,
+            cfg: Config::default(),
+        };
+        let mut ctx = Ctx { cat: "ai-models", ..Default::default() };
+        assert_eq!(rules.file_class(&ctx, "ai-models", "m.gguf"), "Model");
+        assert_eq!(rules.file_class(&ctx, "vms", "disk.qcow2"), "VM");
+        ctx.rebuildable = true;
+        assert_eq!(rules.file_class(&ctx, "developer", "lib.a"), "Reproducible Build");
+        assert_eq!(rules.file_class(&ctx, "caches", "x"), "Cache");
+        assert_eq!(rules.file_class(&ctx, "gaming", "game.bin"), "Game");
+    }
 }

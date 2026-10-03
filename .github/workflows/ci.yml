@@ -20,3 +20,15 @@ jobs:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Evaluate workstation and run native configuration checks
         run: nix flake check --no-update-lock-file -L
+
+  desktop-tools-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: packages/desktop-tools
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: cargo test desktop-tools workspace
+        run: cargo test --workspace

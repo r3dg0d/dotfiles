@@ -340,3 +340,33 @@ pub fn format_duration_ms(ms: u64) -> String {
     }
 }
 
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn human_bytes_scales_decimal() {
+        assert_eq!(human_bytes(500), "500 B");
+        assert_eq!(human_bytes(1_500), "1.5 KB");
+        assert_eq!(human_bytes(2_500_000), "2.5 MB");
+        assert_eq!(human_bytes(1_200_000_000), "1.2 GB");
+    }
+
+    #[test]
+    fn format_duration_ms_buckets() {
+        assert_eq!(format_duration_ms(42), "42ms");
+        assert_eq!(format_duration_ms(1000), "1s");
+        assert_eq!(format_duration_ms(1500), "1.5s");
+        assert_eq!(format_duration_ms(65_000), "1m 5s");
+        assert_eq!(format_duration_ms(3_661_000), "1h 1m 1s");
+    }
+
+    #[test]
+    fn pkexec_failure_classifies_known_messages() {
+        assert!(pkexec_failure(&["No authentication agent found".into()]).is_some());
+        assert!(pkexec_failure(&["Authentication dialog was dismissed".into()]).is_some());
+        assert!(pkexec_failure(&["Error executing command as another user: Not authorized".into()]).is_some());
+        assert!(pkexec_failure(&["building package…".into()]).is_none());
+    }
+}

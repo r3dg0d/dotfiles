@@ -114,6 +114,23 @@ fn kernel_section(sys: &SystemInfo) -> Value {
     })
 }
 
+/// How a flake input is pinned — decides whether `nix flake update` can move it.
+fn pin_kind(typ: &str, has_original_rev: bool, original_ref: Option<&str>) -> &'static str {
+    if typ == "tarball" || typ == "file" {
+        "release"
+    } else if has_original_rev {
+        "commit"
+    } else if let Some(r) = original_ref {
+        if r.starts_with('v') || r.chars().next().map(|c| c.is_ascii_digit()).unwrap_or(false) {
+            "tag"
+        } else {
+            "branch"
+        }
+    } else {
+        "branch"
+    }
+}
+
 /// Classify each root flake input from flake.lock: how it is pinned decides
 /// whether `nix flake update` can move it at all.
 fn flake_inputs_local(sys: &SystemInfo) -> (Vec<Value>, Option<String>) {
@@ -132,19 +149,7 @@ fn flake_inputs_local(sys: &SystemInfo) -> (Vec<Value>, Option<String>) {
             let locked = &node["locked"];
             let original = &node["original"];
             let typ = locked["type"].as_str().unwrap_or("?");
-            let pin = if typ == "tarball" || typ == "file" {
-                "release"
-            } else if original.get("rev").is_some() {
-                "commit"
-            } else if let Some(r) = original["ref"].as_str() {
-                if r.starts_with('v') || r.chars().next().map(|c| c.is_ascii_digit()).unwrap_or(false) {
-                    "tag"
-                } else {
-                    "branch"
-                }
-            } else {
-                "branch"
-            };
+            let pin = pin_kind(typ, original.get("rev").is_some(), original["ref"].as_str());
             out.push(json!({
                 "name": name,
                 "type": typ,
@@ -638,4 +643,54 @@ pub fn scheduled_check(cfg: &Config, cfg_err: Option<String>, scheduled: bool) -
         let _ = common::write_json(&sig_path, &sig, 0o600);
     }
     0
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn version_key_orders_semver_ish_tags() {
+        assert!(version_key("v1.2.3") < version_key("v1.2.10"));
+        assert!(version_key("0.9.0") < version_key("v1.0.0"));
+        assert_eq!(version_key("v2.0.0"), vec![2, 0, 0]);
+        assert!(version_key("1.0.0") < version_key("1.0.1"));
+    }
+
+    #[test]
+    fn latest_tag_prefers_peeled_and_highest() {
+        let refs = vec![
+            ("aaa".into(), "refs/tags/v1.0.0".into()),
+            ("bbb".into(), "refs/tags/v1.0.0^{}".into()),
+            ("ccc".into(), "refs/tags/v0.9.0".into()),
+            ("ddd".into(), "refs/tags/v1.1.0".into()),
+            ("eee".into(), "refs/heads/main".into()),
+        ];
+        let (tag, sha) = latest_tag(&refs).expect("tag");
+        assert_eq!(tag, "v1.1.0");
+        assert_eq!(sha, "ddd");
+        // peeled commit wins for annotated tags
+        let refs2 = vec![
+            ("obj".into(), "refs/tags/v2.0.0".into()),
+            ("commit".into(), "refs/tags/v2.0.0^{}".into()),
+        ];
+        assert_eq!(latest_tag(&refs2).unwrap(), ("v2.0.0".into(), "commit".into()));
+    }
+
+    #[test]
+    fn pin_kind_classifies_lock_originals() {
+        assert_eq!(pin_kind("tarball", false, None), "release");
+        assert_eq!(pin_kind("file", false, Some("anything")), "release");
+        assert_eq!(pin_kind("github", true, Some("main")), "commit");
+        assert_eq!(pin_kind("github", false, Some("v1.2.3")), "tag");
+        assert_eq!(pin_kind("github", false, Some("1.2.3")), "tag");
+        assert_eq!(pin_kind("github", false, Some("main")), "branch");
+        assert_eq!(pin_kind("github", false, None), "branch");
+    }
+
+    #[test]
+    fn short_rev_truncates_to_twelve() {
+        assert_eq!(short("abcdef0123456789"), "abcdef012345");
+        assert_eq!(short("abc"), "abc");
+    }
 }

@@ -186,6 +186,21 @@ fn canon(p: &str) -> String {
     fs::canonicalize(p).map(|x| x.to_string_lossy().into_owned()).unwrap_or_default()
 }
 
+/// Why a generation (newest-first index `i`) must be kept, if any.
+fn generation_keep_reason(i: usize, keep: usize, is_current: bool, is_booted: bool, is_boot_default: bool) -> Option<&'static str> {
+    if is_current {
+        Some("current")
+    } else if is_booted {
+        Some("booted")
+    } else if is_boot_default {
+        Some("boot default")
+    } else if i < keep.max(1) {
+        Some("recent (kept)")
+    } else {
+        None
+    }
+}
+
 /// Which system generations may be deleted: never the current, booted or
 /// boot-default one, and never the newest `keep`.
 pub fn deletable_system_generations(keep: usize) -> (Vec<u64>, Vec<Value>) {
@@ -196,11 +211,7 @@ pub fn deletable_system_generations(keep: usize) -> (Vec<u64>, Vec<Value>) {
     let mut del = vec![];
     let mut listing = vec![];
     for (i, g) in gens.iter().enumerate() {
-        let reason = if g.target == current { Some("current") }
-            else if g.target == booted { Some("booted") }
-            else if g.target == default { Some("boot default") }
-            else if i < keep.max(1) { Some("recent (kept)") }
-            else { None };
+        let reason = generation_keep_reason(i, keep, g.target == current, g.target == booted, g.target == default);
         if reason.is_none() { del.push(g.n); }
         listing.push(json!({ "generation": g.n, "date": g.date, "keep": reason.is_some(), "reason": reason }));
     }
@@ -218,7 +229,7 @@ fn deletable_user_generations(keep: usize) -> (Vec<u64>, Vec<Value>) {
     let mut listing = vec![];
     for (i, g) in gens.iter().enumerate() {
         let name = g.link.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
-        let reason = if name == current { Some("current") } else if i < keep.max(1) { Some("recent (kept)") } else { None };
+        let reason = generation_keep_reason(i, keep, name == current, false, false);
         if reason.is_none() { del.push(g.n); }
         listing.push(json!({ "generation": g.n, "date": g.date, "keep": reason.is_some(), "reason": reason }));
     }
@@ -828,4 +839,56 @@ pub fn privileged_main(args: &[String]) -> i32 {
     }
     done(ok, if ok { "Privileged cleanup finished" } else { "Privileged cleanup failed" });
     if ok { 0 } else { 1 }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::CleanDefaults;
+
+    #[test]
+    fn parse_retention_journalctl_subset() {
+        assert_eq!(parse_retention("4weeks"), Some(4 * 7 * 86400));
+        assert_eq!(parse_retention("2w"), Some(2 * 7 * 86400));
+        assert_eq!(parse_retention("1month"), Some(30 * 86400));
+        assert_eq!(parse_retention("30d"), Some(30 * 86400));
+        assert_eq!(parse_retention("12h"), Some(12 * 3600));
+        assert_eq!(parse_retention("0d"), None);
+        assert_eq!(parse_retention("forever"), None);
+        assert_eq!(parse_retention(""), None);
+    }
+
+    #[test]
+    fn generation_keep_reason_protects_critical_and_recent() {
+        assert_eq!(generation_keep_reason(5, 3, true, false, false), Some("current"));
+        assert_eq!(generation_keep_reason(5, 3, false, true, false), Some("booted"));
+        assert_eq!(generation_keep_reason(5, 3, false, false, true), Some("boot default"));
+        assert_eq!(generation_keep_reason(0, 3, false, false, false), Some("recent (kept)"));
+        assert_eq!(generation_keep_reason(2, 3, false, false, false), Some("recent (kept)"));
+        assert_eq!(generation_keep_reason(3, 3, false, false, false), None);
+        // keep=0 still keeps the newest one
+        assert_eq!(generation_keep_reason(0, 0, false, false, false), Some("recent (kept)"));
+        assert_eq!(generation_keep_reason(1, 0, false, false, false), None);
+    }
+
+    #[test]
+    fn safe_clean_defaults_vs_advanced() {
+        let d = CleanDefaults::default();
+        assert!(d.nix_generations && d.nix_garbage && d.flatpak_unused && d.thumbnails && d.journal);
+        assert!(!d.trash && !d.package_caches && !d.containers);
+    }
+
+    #[test]
+    fn du_measures_temp_tree_without_touching_home() {
+        let root = std::env::temp_dir().join(format!("storage-opt-du-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&root);
+        fs::create_dir_all(root.join("sub")).unwrap();
+        fs::write(root.join("a.bin"), vec![0u8; 4096]).unwrap();
+        fs::write(root.join("sub/b.bin"), vec![1u8; 8192]).unwrap();
+        let (bytes, files) = du(&root);
+        assert_eq!(files, 2);
+        // allocated blocks are at least the logical sizes (filesystem may round up)
+        assert!(bytes >= 4096 + 8192, "bytes={bytes}");
+        let _ = fs::remove_dir_all(&root);
+    }
 }

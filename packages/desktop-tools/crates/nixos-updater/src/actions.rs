@@ -865,3 +865,109 @@ fn revert(sys: &crate::SystemInfo, id: &str) -> i32 {
                    else { format!("Partially reverted: {}", refused.join("; ")) } }));
     if ok { 0 } else { 1 }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn valid_release_accepts_channel_style_names() {
+        assert!(valid_release("nixos-26.05.1234.abcdef123456"));
+        assert!(valid_release("nixos-26.11pre1077996.6774f7bc2537"));
+        assert!(!valid_release("unstable"));
+        assert!(!valid_release("nixos-"));
+        assert!(!valid_release("nixos-../evil"));
+        assert!(!valid_release(&format!("nixos-{}", "a".repeat(80))));
+    }
+
+    #[test]
+    fn valid_ident_rejects_path_injection() {
+        assert!(valid_ident("homeConfigurations"));
+        assert!(valid_ident("zionsec"));
+        assert!(valid_ident("home-manager"));
+        assert!(!valid_ident(""));
+        assert!(!valid_ident("../etc"));
+        assert!(!valid_ident("foo bar"));
+        assert!(!valid_ident(&"x".repeat(64)));
+    }
+
+    #[test]
+    fn chrono_like_formats_known_unix_instant() {
+        // 2026-09-22 22:02:39 UTC
+        assert_eq!(chrono_like(1_790_114_559), "20260922T220239Z");
+    }
+
+    #[test]
+    fn plan_builds_steps_from_status_snapshot() {
+        let st = json!({
+            "checkedAt": 100,
+            "flatpak": {
+                "user": { "updates": [{ "ref": "app/com.example.App/x86_64/stable" }] },
+                "system": { "updates": [] }
+            },
+            "mods": { "mods": [
+                { "id": "foo", "updateAvailable": true },
+                { "id": "bar", "updateAvailable": false }
+            ]},
+            "nixpkgs": { "updateAvailable": true, "current": "nixos-26.05.1.aaa", "latest": "nixos-26.05.2.bbb" },
+            "flakeInputs": [
+                { "name": "home-manager", "outdated": true, "newerUpstream": true, "updatableByLock": true },
+                { "name": "ambxst", "outdated": false, "newerUpstream": true, "updatableByLock": false, "pin": "commit" },
+                { "name": "nixpkgs", "outdated": false, "newerUpstream": true, "updatableByLock": false, "pin": "release" }
+            ],
+            "flakeRepo": { "git": true, "unrelatedChanges": ["README.md"] },
+            "kernel": { "updateChangesKernel": false },
+            "ambxst": { "updateAvailable": false }
+        });
+        let p = plan(&st);
+        let ids: Vec<&str> = p["steps"].as_array().unwrap().iter().map(|s| s["id"].as_str().unwrap()).collect();
+        assert_eq!(ids, vec!["flatpak-user", "mods", "nixpkgs", "flake-inputs", "rebuild"]);
+        assert_eq!(p["steps"][2]["release"], "nixos-26.05.2.bbb");
+        assert_eq!(p["steps"][3]["inputs"], json!(["home-manager"]));
+        // rebuild is default when flake changes are planned
+        assert_eq!(p["steps"][4]["default"], true);
+        let warnings = p["warnings"].as_array().unwrap();
+        assert!(warnings.iter().any(|w| w.as_str().unwrap().contains("Pinned inputs")));
+        assert!(warnings.iter().any(|w| w.as_str().unwrap().contains("uncommitted")));
+    }
+
+    #[test]
+    fn plan_rebuild_default_false_without_flake_changes() {
+        let st = json!({
+            "checkedAt": 1,
+            "flatpak": { "user": { "updates": [] }, "system": { "updates": [] } },
+            "mods": { "mods": [] },
+            "nixpkgs": { "updateAvailable": false },
+            "flakeInputs": [],
+            "flakeRepo": { "git": true, "unrelatedChanges": [] },
+            "kernel": { "updateChangesKernel": false },
+            "ambxst": { "updateAvailable": false }
+        });
+        let p = plan(&st);
+        let rebuild = p["steps"].as_array().unwrap().iter().find(|s| s["id"] == "rebuild").unwrap();
+        assert_eq!(rebuild["default"], false);
+    }
+
+    #[test]
+    fn lock_diff_reports_changed_inputs_only() {
+        use std::io::Write;
+        let dir = std::env::temp_dir().join(format!("nixos-updater-lock-diff-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        fs::create_dir_all(&dir).unwrap();
+        let before = dir.join("before.json");
+        let after = dir.join("after.json");
+        let mk = |path: &std::path::Path, rev: &str| {
+            let mut f = fs::File::create(path).unwrap();
+            write!(f, r#"{{"root":"root","nodes":{{"root":{{"inputs":{{"nixpkgs":"nixpkgs"}}}},"nixpkgs":{{"locked":{{"rev":"{rev}"}}}}}}}}"#).unwrap();
+        };
+        mk(&before, "aaaa");
+        mk(&after, "bbbb");
+        let diff = lock_diff(&before, &after);
+        assert_eq!(diff.len(), 1);
+        assert_eq!(diff[0]["input"], "nixpkgs");
+        assert_eq!(diff[0]["from"], "aaaa");
+        assert_eq!(diff[0]["to"], "bbbb");
+        let _ = fs::remove_dir_all(&dir);
+    }
+}

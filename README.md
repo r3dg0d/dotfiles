@@ -22,18 +22,21 @@ capture of a running niri session. The SDDM image is the real theme rendered by
 | `palette/palette.json` | The single palette (names, hex, usage). Everything is generated from it |
 | `templates/` | Config templates with `{{color}}` placeholders |
 | `config/` | Rendered configs (what gets installed): niri, ghostty, waybar, fuzzel, mako, fastfetch, SDDM theme |
-| `wallpaper/` | `deep-space.png` (3840×2160) and a 1440p copy for SDDM |
+| `wallpaper/` | `deep-space.png` (3840×2160), a 1440p copy for SDDM, and `deep-space-live.mp4` (24 s seamless loop, 1440p H.264) |
 | `nix/rice.nix` | NixOS module: packages, Nerd Font, SDDM theme (`services.displayManager.sddm.theme = "deep-space"`) |
 | `nix/sddm-theme.nix` | The SDDM theme as a package (Qt 6, imports only `QtQuick`) |
 | `tools/render.py` | Re-renders `templates/` → `config/` after you change the palette |
 | `tools/gen-wallpaper.py` | Regenerates the wallpaper (numpy + pillow; any size/seed) |
+| `tools/gen-live-wallpaper.py` | Regenerates the live wallpaper (slow rotation, crossfaded so it loops seamlessly; needs ffmpeg) |
 | `install.sh` | Copies (or `--link`s) the configs into `~/.config` |
 
 ### Highlights
 
 - **niri:** 14px gaps, 12px rounded corners, violet→lavender gradient focus ring, soft shadows,
-  slightly dimmed inactive windows. Starts xwayland-satellite, swaybg (wallpaper), waybar and mako.
-  Default binds kept, with `Mod+T` / `Mod+Return` → ghostty, `Mod+D` → fuzzel,
+  slightly dimmed inactive windows. Starts xwayland-satellite, the wallpaper (`~/.config/niri/wallpaper.sh`: live via mpvpaper, paused while hidden; falls back to swaybg with the still), waybar and mako.
+  Run `sh ~/.config/niri/wallpaper.sh static` for the still image. The wallpapers also live at
+  `/run/current-system/sw/share/wallpapers` (from `nix/rice.nix`), so they work even if the copy into `~/.local/share/wallpapers` is missing.
+  Default binds kept, with `Mod+T` / `Mod+Return` → ghostty, `Mod+D` / `Mod+Space` → fuzzel (Papirus-Dark icons),
   `Print` / `Mod+Shift+S` region screenshot, `Ctrl+Print` screen, `Alt+Print` window
   (saved to `~/Pictures/Screenshots` and copied).
 - **ghostty:** JetBrainsMono Nerd Font 12, palette colors for all 16 ANSI slots, padding, 90% opacity

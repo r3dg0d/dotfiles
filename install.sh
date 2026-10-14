@@ -53,6 +53,8 @@ while IFS= read -r -d '' f; do
 done < <(find "$here/config" -type f -print0 | sort -z)
 
 place "$here/wallpaper/deep-space.png" "$data/wallpapers/deep-space.png"
+place "$here/wallpaper/deep-space-live.mp4" "$data/wallpapers/deep-space-live.mp4"
+[ "$DRY" = yes ] || chmod +x "$cfg/niri/wallpaper.sh" 2>/dev/null || true
 act mkdir -p "$HOME/Pictures/Screenshots"
 
 msg="done: $changed updated, $same already up to date"

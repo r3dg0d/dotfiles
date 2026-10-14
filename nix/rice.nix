@@ -4,15 +4,25 @@
 { config, lib, pkgs, ... }:
 let
   sddmTheme = pkgs.callPackage ./sddm-theme.nix { };
+  # wallpapers at /run/current-system/sw/share/wallpapers (fallback if ~/.local/share/wallpapers is missing)
+  wallpapers = pkgs.runCommand "deep-space-wallpapers" { } ''
+    mkdir -p $out/share/wallpapers
+    cp ${../wallpaper/deep-space.png} $out/share/wallpapers/deep-space.png
+    cp ${../wallpaper/deep-space-live.mp4} $out/share/wallpapers/deep-space-live.mp4
+  '';
 in
 {
   programs.niri.enable = lib.mkDefault true;
 
   environment.systemPackages = with pkgs; [
-    ghostty waybar fuzzel mako swaybg swaylock swayidle xwayland-satellite
+    ghostty waybar fuzzel mako swaybg mpvpaper swaylock swayidle xwayland-satellite
     fastfetch wl-clipboard grim slurp brightnessctl pavucontrol networkmanagerapplet
-    sddmTheme
+    papirus-icon-theme desktop-file-utils
+    sddmTheme wallpapers
   ];
+
+  # fuzzel and other launchers read .desktop files from XDG_DATA_DIRS (includes /run/current-system/sw/share)
+  environment.pathsToLink = [ "/share/applications" "/share/icons" "/share/wallpapers" ];
 
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono

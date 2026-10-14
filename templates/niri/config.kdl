@@ -59,7 +59,7 @@ window-rule {
 }
 
 layer-rule {
-    match namespace="^wallpaper$"
+    match namespace="^(wallpaper|mpvpaper)$"
     place-within-backdrop true
 }
 
@@ -70,8 +70,8 @@ overview {
 screenshot-path "~/Pictures/Screenshots/%Y-%m-%d_%H-%M-%S.png"
 
 spawn-at-startup "xwayland-satellite"
-// niri does not expand ~ inside arguments, so go through sh for $HOME
-spawn-sh-at-startup "pkill -x swaybg; exec swaybg -m fill -c '{{void}}' -i \"$HOME/.local/share/wallpapers/deep-space.png\""
+// live wallpaper (mpvpaper) with swaybg fallback; sh so that ~ expands
+spawn-sh-at-startup "sh ~/.config/niri/wallpaper.sh"
 spawn-at-startup "waybar"
 spawn-at-startup "mako"
 
@@ -93,6 +93,7 @@ binds {
     Mod+T hotkey-overlay-title="Terminal: ghostty" { spawn "ghostty"; }
     Mod+Return { spawn "ghostty"; }
     Mod+D hotkey-overlay-title="Launcher: fuzzel" { spawn "fuzzel"; }
+    Mod+Space hotkey-overlay-title="Launcher: fuzzel" { spawn "fuzzel"; }
     Super+Alt+L hotkey-overlay-title="Lock screen" { spawn "swaylock" "-f" "-c" "{{void_nohash}}"; }
 
     XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.05+" "-l" "1.0"; }

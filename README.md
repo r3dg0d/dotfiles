@@ -1,123 +1,78 @@
-# NixOS workstation dotfiles
+# dotfiles — deep-space
 
-An audited configuration extracted from a working Intel / NVIDIA RTX 4090 workstation: Hyprland with native Lua, Ambxst, a horizontal scrolling layout, and a green phosphor CRT Ghostty terminal. This preserves an existing desktop and its practical fixes.
+A niri rice for NixOS: near-black space, violet accents (`#b46bff`, same as
+[r3dg0d.github.io](https://r3dg0d.github.io)), a soft green highlight and an original
+procedurally generated nebula wallpaper.
 
-## Stack
+![SDDM login](previews/sddm.png)
 
-- NixOS, pinned nixpkgs, Linux 7.2, systemd-boot, NVIDIA open kernel modules with the stable driver package.
-- Hyprland / XWayland, Ambxst shell, SDDM with the [Matrix Code Rain](https://github.com/r3dg0d/matrix-code-rain-sddm) greeter theme, PipeWire, Bibata cursor and JetBrains Mono Nerd Font.
-- Bash, Ghostty, Git, tmux, Rust/C/C++/Python/Android tools; Firefox, Thunderbird, Obsidian, MPD/rmpc, Steam, Ollama CUDA and security/OSINT tools.
-- NixOS modules manage packages and selected native files. **Home Manager is not used.** Ambxst settings remain writable and are seeded only when absent.
+![Desktop mockup](previews/desktop-mockup.png)
 
-## Layout
+<sub>The desktop image is a **mockup** rendered in a browser from the same colors and fonts, not a
+capture of a running niri session. The SDDM image is the real theme rendered by
+`sddm-greeter-qt6 --test-mode`.</sub>
 
-```text
-flake.nix / flake.lock  pinned inputs and host constructor
-hosts/workstation/     system baseline and PUBLIC EXAMPLE hardware
-modules/               existing functional NixOS modules
-config/                native Lua, Ghostty, fuzzel, Ambxst and theme settings
-packages/ / dev/       custom packages and development shell
-scripts/               validation and privacy checks
-assets/screenshots/    reviewed screenshots used by this README
-docs/                  audit, migration, installation and recovery
-licenses/              retained third-party notices
+> The previous NixOS workstation configuration (Hyprland, Ambxst, Ghostty CRT) is preserved on the
+> [`nixos-workstation-archive`](https://github.com/r3dg0d/dotfiles/tree/nixos-workstation-archive) branch.
+
+## What's inside
+
+| Path | What |
+|------|------|
+| `palette/palette.json` | The single palette (names, hex, usage). Everything is generated from it |
+| `templates/` | Config templates with `{{color}}` placeholders |
+| `config/` | Rendered configs (what gets installed): niri, ghostty, waybar, fuzzel, mako, fastfetch, SDDM theme |
+| `wallpaper/` | `deep-space.png` (3840×2160) and a 1440p copy for SDDM |
+| `nix/rice.nix` | NixOS module: packages, Nerd Font, SDDM theme (`services.displayManager.sddm.theme = "deep-space"`) |
+| `nix/sddm-theme.nix` | The SDDM theme as a package (Qt 6, imports only `QtQuick`) |
+| `tools/render.py` | Re-renders `templates/` → `config/` after you change the palette |
+| `tools/gen-wallpaper.py` | Regenerates the wallpaper (numpy + pillow; any size/seed) |
+| `install.sh` | Copies (or `--link`s) the configs into `~/.config` |
+
+### Highlights
+
+- **niri:** 14px gaps, 12px rounded corners, violet→lavender gradient focus ring, soft shadows,
+  slightly dimmed inactive windows. Starts xwayland-satellite, swaybg (wallpaper), waybar and mako.
+  Default binds kept, with `Mod+T` / `Mod+Return` → ghostty, `Mod+D` → fuzzel,
+  `Print` / `Mod+Shift+S` region screenshot, `Ctrl+Print` screen, `Alt+Print` window
+  (saved to `~/Pictures/Screenshots` and copied).
+- **ghostty:** JetBrainsMono Nerd Font 12, palette colors for all 16 ANSI slots, padding, 90% opacity
+  with background blur, blinking bar cursor in violet.
+- **waybar:** glassy pill modules: NixOS logo, niri workspaces, window title, clock, tray, audio,
+  network, battery.
+- **fuzzel / mako:** matching rounded, violet-bordered launcher and notifications.
+- **fastfetch:** custom starfield logo and palette colors.
+- **SDDM:** the wallpaper with twinkling stars, a big clock, a centered glass login card, session
+  and power pills. No keyboard-layout box, so the stock theme's `zz` layout glitch is gone.
+
+## Install
+
+The easiest way is through [nixos-installer](https://github.com/r3dg0d/nixos-installer), which does
+everything below (`install.sh --rice` on a fresh install, or `post-install.sh` on an existing system).
+
+By hand on NixOS:
+
+```bash
+git clone https://github.com/r3dg0d/dotfiles ~/src/dotfiles
+# 1. system side: packages, font, SDDM theme
+#    add to imports in /etc/nixos/configuration.nix:  /home/<you>/src/dotfiles/nix/rice.nix
+sudo nixos-rebuild switch
+# 2. user side: configs into ~/.config (existing files are backed up first)
+~/src/dotfiles/install.sh            # or --link to symlink, --dry-run to preview
 ```
 
-## Screenshots
+Log out and pick **niri** in SDDM.
 
-### Matrix Code Rain (SDDM)
+## Changing colors
 
-![Matrix Code Rain SDDM theme](assets/screenshots/sddm-matrix-code-rain.png)
+Edit `palette/palette.json`, then:
 
-The login screen: Katakana code rain animated in QML behind a black-and-green
-panel, with a profile image, user, password and session controls and compact
-power actions. The theme is a separate project,
-[matrix-code-rain-sddm](https://github.com/r3dg0d/matrix-code-rain-sddm), which
-`modules/login-manager.nix` pins by revision. Captured from
-`sddm-greeter-qt6 --test-mode` at 3440×1440.
-
-### Desktop
-
-![Hyprland desktop](assets/screenshots/hyprland-desktop.png)
-
-Hyprland with the Ambxst shell and its horizontal scrolling layout, on the
-3440×1440 ultrawide this configuration targets.
-
-### Ghostty
-
-![Ghostty terminal](assets/screenshots/ghostty-terminal.png)
-
-Ghostty with the green phosphor CRT shader from `config/ghostty`, showing the
-per-terminal host banner from `modules/shell-greeting.nix`.
-
-Optional terminal flair: the `matrix` digital-rain CLI (`modules/matrix-cli.nix`,
-package under `packages/matrix`) — same green aesthetic, no compositor overlays.
-
-### Application launcher
-
-![Application launcher](assets/screenshots/application-launcher.png)
-
-`fuzzel` on `SUPER + SPACE`, themed to match in `config/fuzzel.ini` and wired
-up by `modules/app-launcher.nix` — here finding the Legacy iOS Kit entry and
-its icon. The same binary, and the same theme, serve the "Open With" picker.
-
-## Start here
-
-Read [INSTALL](docs/INSTALL.md) before activation. The public `workstation` output uses the account `user` and **example disk labels**, not the source machine's identifiers. It is evaluable, but is not a safe disk configuration to apply blindly. Supply generated hardware and your account through a private deployment flake.
-
-```sh
-nix flake show
-nix flake check --no-update-lock-file
-nix fmt
-nix develop
+```bash
+python3 tools/render.py           # templates/ -> config/
+python3 tools/gen-wallpaper.py    # optional: re-tint the wallpaper
+./install.sh
 ```
 
-For a machine intentionally configured to match the public example:
+## License
 
-```sh
-sudo nixos-rebuild switch --flake .#workstation
-```
-
-For an existing TTY session, activating a display manager may interrupt login: its service conflicts with the tty1 getty. Prefer a reviewed `nixos-rebuild boot` followed by a deliberate reboot. The private-deployment instructions are the recommended path for the original workstation.
-
-## Customize and update
-
-Edit native files in `config/`, package groups in `modules/`, and account/hardware settings in your private deployment. Hyprland's Lua bindings are authoritative; Ambxst's keybind UI does not automatically update that file. Writable seeds do not overwrite existing preferences on rebuild.
-
-Inputs are revision-pinned. To upgrade, deliberately change the relevant URL in `flake.nix`, then run `nix flake update`, `nix flake check`, and a build. Merely updating the lock does not advance explicitly pinned revisions. Ambxst retains its own nixpkgs input to preserve its existing dependency graph.
-
-## Recovery, privacy and limitations
-
-Select an older generation in the boot menu, or use `sudo nixos-rebuild switch --rollback` from a working console. See [TROUBLESHOOTING](docs/TROUBLESHOOTING.md).
-
-No account tokens, private keys, machine identifiers, browser profiles, vaults, history, logs or wallpapers are included. Configure secrets outside this repository **and outside Nix source paths**; see [PRIVACY](docs/PRIVACY.md). Original configuration and scripts use MIT; retained template material keeps its own license, described in [NOTICE](NOTICE.md).
-
-Not everything on the source machine is published here. The workstation also
-runs modules this repository deliberately omits — among them an Apple device
-and virtualization workbench whose launcher entries include **Legacy iOS Kit**
-(a terminal launcher, its own icon, and udev access for devices in DFU and
-recovery mode), local AI and media services, and emulator packaging. Those
-carry their own licensing and privacy review and are kept in the private
-deployment.
-
-This reconstructs configuration, not personal data or application accounts. Flatpak applications update independently of Nix; downloaded models, Steam games, Obsidian plugins, credentials and wallpapers need separate setup. Existing Ambxst runtime color errors are documented, not silently fixed.
-
-The screenshots above were reviewed for visible personal information before
-publication; `scripts/privacy-scan.py` additionally refuses anything under
-`assets/screenshots/` that is not a PNG within a size limit. The desktop shot
-deliberately omits the top bar, whose media widget shows whatever is playing.
-
-See [SYSTEM-AUDIT](docs/SYSTEM-AUDIT.md), [MIGRATION](docs/MIGRATION.md), [PACKAGES](docs/PACKAGES.md), and [VALIDATION](docs/VALIDATION.md).
-
-## Recent workstation modules
-
-- `matrixshot-path` / `privsec-tools-path`: wrappers so Hyprland sessions find `~/.local/bin` tools
-- `discord-clients`: Equibop + Oxicord (unofficial; ToS risk)
-- `helium`, `local-ai-tools`, `pi-coding-agent`, `zed`, `workstation-polish`
-
-
-CI evaluates the workstation and runs the native configuration checks without
-activating a system. These cover Lua syntax and portable desktop bindings, JSON,
-MIME association behavior, publication-scanner regressions, and secret scanning.
-The complete input graph is locked; missing input pins fail the CI check rather
-than being silently resolved.
+MIT, see [LICENSE](LICENSE). The wallpaper is original procedural artwork, also MIT.

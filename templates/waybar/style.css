@@ -1,0 +1,33 @@
+/* deep-space — waybar */
+* {
+  font-family: "JetBrainsMono Nerd Font", sans-serif;
+  font-size: 13px;
+  min-height: 0;
+  border: none;
+  border-radius: 0;
+}
+window#waybar { background: transparent; color: {{text}}; }
+tooltip { background: rgba({{surface_rgb}}, 0.95); border: 1px solid {{line}}; border-radius: 10px; }
+tooltip label { color: {{text}}; }
+
+#custom-logo, #workspaces, #window, #clock, #tray, #pulseaudio, #network, #battery {
+  background: linear-gradient(135deg, rgba({{violet_rgb}}, 0.16), rgba({{surface_rgb}}, 0.72) 60%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  padding: 0 14px;
+  margin: 0;
+  color: {{text}};
+}
+#custom-logo { color: {{violet}}; font-size: 16px; padding: 0 14px 0 12px; }
+window#waybar.empty #window { background: transparent; border-color: transparent; }
+#workspaces { padding: 0 6px; }
+#workspaces button { color: {{subtext}}; padding: 0 6px; background: transparent; border-radius: 999px; }
+#workspaces button.active { color: {{violet}}; }
+#workspaces button.urgent { color: {{red}}; }
+#workspaces button:hover { background: rgba({{violet_rgb}}, 0.18); box-shadow: none; }
+#clock { color: {{lavender}}; font-weight: bold; }
+#pulseaudio.muted, #network.disconnected { color: {{muted}}; }
+#network { color: {{green}}; }
+#battery.charging { color: {{green}}; }
+#battery.warning:not(.charging) { color: {{yellow}}; }
+#battery.critical:not(.charging) { color: {{red}}; }

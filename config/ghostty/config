@@ -1,0 +1,43 @@
+# deep-space — ghostty
+font-family = JetBrainsMono Nerd Font
+font-size = 12
+font-feature = calt
+font-feature = liga
+
+window-padding-x = 14
+window-padding-y = 12
+window-padding-balance = true
+window-decoration = false
+background-opacity = 0.90
+background-blur = true
+gtk-titlebar = false
+confirm-close-surface = false
+
+cursor-style = bar
+cursor-style-blink = true
+cursor-color = #b46bff
+cursor-text = #07060d
+mouse-hide-while-typing = true
+copy-on-select = clipboard
+
+background = #07060d
+foreground = #f2f0ff
+selection-background = #1a1630
+selection-foreground = #f2f0ff
+
+palette = 0=#07060d
+palette = 1=#ff5c8a
+palette = 2=#7dffa8
+palette = 3=#ffd479
+palette = 4=#7aa2ff
+palette = 5=#b46bff
+palette = 6=#6ee7f2
+palette = 7=#9a96b3
+palette = 8=#5d5878
+palette = 9=#ff5c8a
+palette = 10=#00ff66
+palette = 11=#ffd479
+palette = 12=#7aa2ff
+palette = 13=#d4b8ff
+palette = 14=#6ee7f2
+palette = 15=#f2f0ff

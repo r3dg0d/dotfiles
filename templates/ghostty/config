@@ -1,0 +1,43 @@
+# deep-space — ghostty
+font-family = JetBrainsMono Nerd Font
+font-size = 12
+font-feature = calt
+font-feature = liga
+
+window-padding-x = 14
+window-padding-y = 12
+window-padding-balance = true
+window-decoration = false
+background-opacity = 0.90
+background-blur = true
+gtk-titlebar = false
+confirm-close-surface = false
+
+cursor-style = bar
+cursor-style-blink = true
+cursor-color = {{violet}}
+cursor-text = {{void}}
+mouse-hide-while-typing = true
+copy-on-select = clipboard
+
+background = {{void}}
+foreground = {{text}}
+selection-background = {{overlay}}
+selection-foreground = {{text}}
+
+palette = 0={{ansi0}}
+palette = 1={{ansi1}}
+palette = 2={{ansi2}}
+palette = 3={{ansi3}}
+palette = 4={{ansi4}}
+palette = 5={{ansi5}}
+palette = 6={{ansi6}}
+palette = 7={{ansi7}}
+palette = 8={{ansi8}}
+palette = 9={{ansi9}}
+palette = 10={{ansi10}}
+palette = 11={{ansi11}}
+palette = 12={{ansi12}}
+palette = 13={{ansi13}}
+palette = 14={{ansi14}}
+palette = 15={{ansi15}}

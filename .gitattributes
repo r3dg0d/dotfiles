@@ -1,2 +1,0 @@
-# Embedded Go source in the existing Nix patch intentionally uses tabs.
-modules/ambxst.nix whitespace=-space-before-tab

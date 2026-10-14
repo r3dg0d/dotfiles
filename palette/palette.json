@@ -1,0 +1,25 @@
+{
+  "name": "deep-space",
+  "description": "Near-black space, violet accents, a soft green highlight. Matches r3dg0d.github.io.",
+  "colors": {
+    "void":      { "hex": "#07060d", "use": "base background" },
+    "mantle":    { "hex": "#0b0914", "use": "darker panels" },
+    "surface":   { "hex": "#0f0d1a", "use": "cards, bars" },
+    "overlay":   { "hex": "#1a1630", "use": "hover / selection background" },
+    "line":      { "hex": "#26223a", "use": "borders, inactive rings" },
+    "muted":     { "hex": "#5d5878", "use": "comments, disabled text" },
+    "subtext":   { "hex": "#9a96b3", "use": "secondary text" },
+    "text":      { "hex": "#f2f0ff", "use": "primary text" },
+    "violet":    { "hex": "#b46bff", "use": "primary accent (site accent)" },
+    "lavender":  { "hex": "#d4b8ff", "use": "light accent" },
+    "nebula":    { "hex": "#7c4dff", "use": "deep accent" },
+    "green":     { "hex": "#7dffa8", "use": "soft secondary highlight" },
+    "signal":    { "hex": "#00ff66", "use": "site green, used sparingly" },
+    "red":       { "hex": "#ff5c8a", "use": "errors, urgent" },
+    "yellow":    { "hex": "#ffd479", "use": "warnings" },
+    "blue":      { "hex": "#7aa2ff", "use": "info" },
+    "cyan":      { "hex": "#6ee7f2", "use": "links, ansi cyan" }
+  },
+  "ansi": ["void","red","green","yellow","blue","violet","cyan","subtext",
+           "muted","red","signal","yellow","blue","lavender","cyan","text"]
+}

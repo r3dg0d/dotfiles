@@ -1,0 +1,12 @@
+[SddmGreeterTheme]
+Name=deep-space
+Description=Deep-space login for niri: nebula wallpaper, twinkling stars, a glass login card
+Author=r3dg0d
+License=MIT
+Type=sddm-theme
+Version=1.0
+Website=https://github.com/r3dg0d/dotfiles
+Screenshot=preview.jpg
+MainScript=Main.qml
+ConfigFile=theme.conf
+QtVersion=6

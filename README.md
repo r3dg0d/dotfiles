@@ -22,6 +22,7 @@ capture of a running niri session. The SDDM image is the real theme rendered by
 | `palette/palette.json` | The single palette (names, hex, usage). Everything is generated from it |
 | `templates/` | Config templates with `{{color}}` placeholders |
 | `config/` | Rendered configs (what gets installed): niri, ghostty, waybar, fuzzel, mako, fastfetch, SDDM theme |
+| `config/quickshell/` | "Purple Galaxy" Quickshell 0.3 widgets (see below) |
 | `wallpaper/` | `deep-space.png` (3840×2160), a 1440p copy for SDDM, and `deep-space-live.mp4` (24 s seamless loop, 1440p H.264) |
 | `nix/rice.nix` | NixOS module: packages, Nerd Font, SDDM theme (`services.displayManager.sddm.theme = "deep-space"`) |
 | `nix/sddm-theme.nix` | The SDDM theme as a package (Qt 6, imports only `QtQuick`) |
@@ -47,6 +48,26 @@ capture of a running niri session. The SDDM image is the real theme rendered by
 - **fastfetch:** custom starfield logo and palette colors.
 - **SDDM:** the wallpaper with twinkling stars, a big clock, a centered glass login card, session
   and power pills. No keyboard-layout box, so the stock theme's `zz` layout glitch is gone.
+
+## Quickshell widgets ("Purple Galaxy")
+
+Live copies of the Quickshell 0.3 widgets from the running desktop. They share one look: a solid
+`#0e0a1c` fill with a painted nebula + starfield (`Nebula.qml`, one Canvas raster, so no gradient seam on
+rounded corners), thin luminous borders, status pills and Cellforge / Zerodot type.
+
+| Widget | What |
+|--------|------|
+| `galaxy/` | Kopuz music player (MPRIS, CAVA visualizer) + synced lyrics (LRCLIB, Genius fallback). `start.sh`; IPC `open` / `toggle` / `close` / `openLyrics` |
+| `galaxy-hub/` | Control center: weather, storage, NixOS/kernel updater, VMs, audio, network (`hub.py` backend) |
+| `galaxy-power/` | Power menu overlay |
+| `galaxy-vm/` | VM "Construct" windows for the vmtools suite |
+| `galaxy-disk/` | Disk map (treemap + category tabs, `scan.py`) |
+| `screenshot/` | Screenshot preview / editor |
+| `deepfake/` | Front-end for [r3dg0d/deepfake](https://github.com/r3dg0d/deepfake) (also shipped in that repo's overlay) |
+
+These are personal: several scripts use absolute `/home/r3dg0d` paths and expect tools from the
+NixOS config (quickshell, cava, playerctl, python3, ghostty). Destructive actions always confirm in the
+widget and run in a visible Ghostty so the sudo prompt is yours.
 
 ## Install
 

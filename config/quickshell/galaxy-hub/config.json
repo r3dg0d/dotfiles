@@ -1,0 +1,4 @@
+{
+  "weather": { "city": "", "units": "fahrenheit" },
+  "updater": { "channel": "" }
+}

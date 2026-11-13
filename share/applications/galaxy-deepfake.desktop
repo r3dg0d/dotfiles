@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Deepfake
+GenericName=Neural Video Control Center
+Comment=Local neural video transformation and disclosed avatars
+Exec="@HOME@/.local/bin/deepfake" app
+Icon=galaxy-deepfake
+Terminal=false
+Categories=AudioVideo;Video;Utility;
+Keywords=deepfake;face;camera;quickshell;avatar;

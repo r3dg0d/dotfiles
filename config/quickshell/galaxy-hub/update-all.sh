@@ -13,6 +13,7 @@ step() {  # step "Name" command...
 skip() { names+=("$1"); results+=("skipped: $2"); times+=("-"); }
 
 step "Channel update"  sudo nix-channel --update
+step "Flake locks (all)" bash ~/.config/quickshell/galaxy-hub/update-flakes.sh
 step "NixOS rebuild (switch)" sudo nixos-rebuild switch
 step "User profile"    env NIXPKGS_ALLOW_UNFREE=1 nix profile upgrade --all --impure
 if command -v flatpak >/dev/null; then

@@ -4,12 +4,13 @@ import Quickshell.Io
 
 ShellRoot {
     id: app
-    property var st: ({ vms: [], checks: {}, docker: false })
+    property var st: ({ vms: [], checks: {}, docker: false, virtManager: false })
     property string updated: ""
     property string toastText: ""
     function refresh() { if (!stateProc.running) stateProc.running = true }
     function act(kind, verb, name) { run(["act", kind, verb, name]); toast(verb + " " + name + "…"); refreshSoon.restart() }
     function term(cmd) { run(["term", cmd]) }
+    function launchVirtManager() { run(["launch", "virt-manager"]); toast("Opening virt-manager…") }
     function run(args) { const p = runner.createObject(app, { command: ["python3", Quickshell.shellPath("vm.py")].concat(args) }); p.running = true }
     function toast(t) { toastText = t; toastTimer.restart() }
     function openKind(k) { const w = ({ android: wAndroid, windows: wWindows, linux: wLinux, ios: wIos, macos: wMacos, all: wAll })[k]; if (w) { w.opened = true; refresh() } }

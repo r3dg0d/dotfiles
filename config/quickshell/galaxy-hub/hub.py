@@ -168,7 +168,7 @@ def storage(refresh=False):
 FLAKE_ROOTS = [HOME + "/Projects", HOME + "/.config", "/etc/nixos", HOME + "/nixos", HOME + "/.dotfiles"]
 
 
-def find_flakes():
+def find_flakes(include_unlocked=False):
     extra = cfg().get("updater", {}).get("flakes", [])
     out_ = []
     for root in FLAKE_ROOTS:
@@ -178,7 +178,7 @@ def find_flakes():
             dirs[:] = [d for d in dirs if not d.startswith(".") and d not in ("node_modules", "result", "target", "build", "dist")]
             if dirpath.count(os.sep) - root.count(os.sep) >= 3:
                 dirs[:] = []
-            if "flake.lock" in files and "flake.nix" in files:
+            if "flake.nix" in files and ("flake.lock" in files or include_unlocked):
                 out_.append(dirpath)
     return sorted(set(out_ + [os.path.expanduser(x) for x in extra]))
 
@@ -534,7 +534,7 @@ TERM_SCRIPTS = {
     "diff": ("Galaxy Updater", "CH=$(python3 ~/.config/quickshell/galaxy-hub/hub.py channel); cd \"$(mktemp -d)\" && "
              "sudo nixos-rebuild build -I nixpkgs=https://channels.nixos.org/$CH/nixexprs.tar.xz && "
              "nix run nixpkgs#nvd -- diff /run/current-system ./result | tee ~/.cache/galaxy-hub/nvd.txt"),
-    "profile-all": ("Galaxy Updater", "NIXPKGS_ALLOW_UNFREE=1 nix profile upgrade --all --impure"),
+    "profile-all": ("Galaxy Updater", "bash ~/.config/quickshell/galaxy-hub/update-flakes.sh --user-only; NIXPKGS_ALLOW_UNFREE=1 nix profile upgrade --all --impure"),
     "everything": ("Galaxy Updater", "bash ~/.config/quickshell/galaxy-hub/update-all.sh"),
     "vm-doctor": ("Galaxy Constructs", "vmtools doctor"),
     "android-setup": ("Galaxy Constructs", "androidvm setup"),
@@ -628,6 +628,8 @@ if __name__ == "__main__":
             except OSError: pass
         out(updater())
     elif cmd == "network": out(network())
+    elif cmd == "flakes":  # one flake dir per line: everything the updater tracks (used by update-flakes.sh)
+        for _p in find_flakes(include_unlocked=True): print(_p)
     elif cmd == "constructs": out(cached("constructs", 60, constructs) if "--refresh" not in rest else constructs())
     elif cmd == "channel":
         v = run(["nixos-version"]); mm = re.match(r"(\d+\.\d+)", v)

@@ -24,6 +24,7 @@ done
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cfg="${XDG_CONFIG_HOME:-$HOME/.config}"
 data="${XDG_DATA_HOME:-$HOME/.local/share}"
+bindir="$HOME/.local/bin"
 backup="$cfg/.dotfiles-backup/$(date +%Y%m%d-%H%M%S)"
 changed=0 same=0 backed=0
 
@@ -54,7 +55,45 @@ done < <(find "$here/config" -type f -print0 | sort -z)
 
 place "$here/wallpaper/deep-space.png" "$data/wallpapers/deep-space.png"
 place "$here/wallpaper/deep-space-live.mp4" "$data/wallpapers/deep-space-live.mp4"
-[ "$DRY" = yes ] || chmod +x "$cfg/niri/wallpaper.sh" 2>/dev/null || true
+
+# Launchers (~/.local/bin)
+if [ -d "$here/bin" ]; then
+  while IFS= read -r -d '' f; do
+    place "$f" "$bindir/$(basename "$f")"
+  done < <(find "$here/bin" -type f -print0 | sort -z)
+fi
+
+# Desktop entries: @HOME@ is rewritten to the installing user's home (desktop files don't expand $HOME)
+if [ -d "$here/share/applications" ]; then
+  tmpdir=""
+  [ "$DRY" = yes ] || tmpdir=$(mktemp -d)
+  while IFS= read -r -d '' f; do
+    name=$(basename "$f")
+    if [ "$DRY" = yes ]; then
+      echo "  would: install desktop $name (HOME=$HOME)"
+    else
+      # Always copy: @HOME@ is rewritten, so a symlink to the template would be wrong.
+      sed "s|@HOME@|$HOME|g" "$f" > "$tmpdir/$name"
+      MODE=copy place "$tmpdir/$name" "$data/applications/$name"
+    fi
+  done < <(find "$here/share/applications" -name '*.desktop' -print0 | sort -z)
+  [ -n "$tmpdir" ] && rm -rf "$tmpdir"
+fi
+
+# Icons
+if [ -d "$here/share/icons" ]; then
+  while IFS= read -r -d '' f; do
+    rel="${f#"$here"/share/icons/}"
+    place "$f" "$data/icons/$rel"
+  done < <(find "$here/share/icons" -type f -print0 | sort -z)
+fi
+
+# Executable bits on scripts (copies only; --link follows the checkout's modes)
+if [ "$DRY" != yes ]; then
+  chmod +x "$cfg/niri/wallpaper.sh" 2>/dev/null || true
+  find "$cfg/quickshell" -type f \( -name '*.sh' -o -name '*.py' -o -name 'chooser' \) -exec chmod +x {} + 2>/dev/null || true
+  chmod +x "$bindir/galaxy-disk" 2>/dev/null || true
+fi
 act mkdir -p "$HOME/Pictures/Screenshots"
 
 msg="done: $changed updated, $same already up to date"

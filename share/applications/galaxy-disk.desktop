@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Disk Map
+GenericName=Disk Usage Analyzer
+Comment=What's using space — treemap by category (Galaxy)
+Exec=@HOME@/.local/bin/galaxy-disk
+Icon=galaxy-disk
+Terminal=false
+Categories=System;Utility;
+Keywords=disk;storage;space;usage;treemap;windirstat;qdirstat;galaxy;

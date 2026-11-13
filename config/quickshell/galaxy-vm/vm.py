@@ -4,9 +4,10 @@
   vm.py state                      JSON: vms, host checks, docker availability
   vm.py act <kind> <verb> <name>   start|stop|shutdown|reboot|restart|gui|delete (runs the CLI detached)
   vm.py term <command...>          run a CLI command in a Ghostty terminal (wizards, setup, fixes)
+  vm.py launch virt-manager        open Virtual Machine Manager detached (libvirt session)
   vm.py log <kind> [n]             tail of the GUI action log for that kind
 """
-import json, os, re, shlex, subprocess, sys, time
+import json, os, re, shlex, shutil, subprocess, sys, time
 from pathlib import Path
 
 HOME = Path.home()
@@ -226,7 +227,8 @@ def state():
                                      "fix": fix_for("android", "docker")})
     else:
         checks["android"].insert(0, {"name": "Docker daemon", "ok": True, "detail": docker_env().get("DOCKER_HOST", "default socket")})
-    print(json.dumps({"ts": int(now), "vms": vms, "checks": checks, "docker": dok}))
+    print(json.dumps({"ts": int(now), "vms": vms, "checks": checks, "docker": dok,
+                      "virtManager": bool(shutil.which("virt-manager"))}))
 
 
 def log_line(kind, text):
@@ -251,6 +253,19 @@ def act(kind, verb, name):
     log_line(kind, "$ " + " ".join(shlex.quote(c) for c in cmd))
     with open(LOGS / f"gui-{kind}.log", "a") as lf:
         subprocess.Popen(cmd, stdout=lf, stderr=lf, stdin=subprocess.DEVNULL, start_new_session=True, env=docker_env())
+    print(json.dumps({"ok": True, "cmd": cmd}))
+
+
+
+def launch(app_name):
+    """Start a GUI tool detached so it outlives the Construct widget."""
+    if app_name != "virt-manager":
+        print(json.dumps({"ok": False, "error": f"unknown app {app_name}"})); return
+    exe = shutil.which("virt-manager")
+    if not exe:
+        print(json.dumps({"ok": False, "error": "virt-manager not on PATH"})); return
+    cmd = ["systemd-run", "--user", "--collect", "--quiet", "--", exe, "--connect", "qemu:///session"]
+    subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
     print(json.dumps({"ok": True, "cmd": cmd}))
 
 
@@ -281,6 +296,8 @@ if __name__ == "__main__":
         act(a[1], a[2], a[3])
     elif a[0] == "term":
         term(a[1:])
+    elif a[0] == "launch" and len(a) == 2:
+        launch(a[1])
     elif a[0] == "log":
         log(a[1], a[2] if len(a) > 2 else 40)
     else:

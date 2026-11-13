@@ -91,7 +91,7 @@ ShellRoot {
         visible: root.open
         anchors { top: true; right: true }
         margins { top: 8; right: 12 }
-        implicitWidth: 500
+        implicitWidth: 580
         implicitHeight: 720
         color: "transparent"
         WlrLayershell.namespace: "galaxy-hub"
@@ -250,7 +250,7 @@ ShellRoot {
                             width: parent.width - 8; spacing: 10
                             RowLayout {
                                 Layout.fillWidth: true; spacing: 8
-                                HubButton { Layout.fillWidth: true; primary: true; text: "󰚰  Update everything"; onClicked: root.ask("Update everything?", "One Ghostty terminal, in order:\nsudo nix-channel --update && sudo nixos-rebuild switch\nnix profile upgrade --all\n(flatpak user+system and fwupdmgr update when installed)", "everything") }
+                                HubButton { Layout.fillWidth: true; primary: true; text: "󰚰  Update everything"; onClicked: root.ask("Update everything?", "One Ghostty terminal, in order:\nsudo nix-channel --update && sudo nixos-rebuild switch\nnix flake update in every flake (system + local, incl. Kyber)\nnix profile upgrade --all\n(flatpak user+system and fwupdmgr update when installed)", "everything") }
                                 HubButton { text: updaterProc.running ? "󰔟" : "󰑐"; hint: "Check again"; onClicked: updaterProc.go(["updater", "--refresh"]) }
                             }
                             Text { text: (root.updater.total || 0) + " pending  ·  checked " + (root.updater.checked || "…") + "  ·  refreshes every 30 min"; color: "#5d5878"; font.family: root.ui; font.pixelSize: 10 }
@@ -355,7 +355,7 @@ ShellRoot {
                                     }
                                 }
                             }
-                            HubButton { Layout.fillWidth: true; text: "󰏗  Upgrade all profile packages (no sudo)"; onClicked: root.act(["term", "profile-all"]) }
+                            HubButton { Layout.fillWidth: true; text: "󰏗  Update local flakes + upgrade all profile packages (no sudo)"; onClicked: root.act(["term", "profile-all"]) }
 
                             SectionHead { label: "FLATPAK"; icon: "󰏖"; badge: root.updater.flatpak && root.updater.flatpak.present ? ((root.updater.flatpak.user.length + root.updater.flatpak.system.length) || "") + "" : "" }
                             Text { Layout.fillWidth: true; wrapMode: Text.Wrap; text: !root.updater.flatpak ? "…" : !root.updater.flatpak.present ? "Flatpak isn't installed on this system." : ("user: " + (root.updater.flatpak.user.join(", ") || "up to date") + "\nsystem: " + (root.updater.flatpak.system.join(", ") || "up to date")); color: "#9a96b3"; font.family: root.ui; font.pixelSize: 11 }
@@ -380,6 +380,7 @@ ShellRoot {
                                     Text { text: "vmtools suite · checked " + (root.vms.checked || "…"); color: "#5d5878"; font.family: root.ui; font.pixelSize: 10 }
                                 }
                                 HubButton { text: "󰆍 manager"; hint: "VM Construct app (vmtools TUI: right-click the launcher)"; onClicked: { Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/quickshell/galaxy-vm/start.sh", "all"]); root.open = false } }
+                                HubButton { text: "󰍹 virt-manager"; hint: "Virtual Machine Manager (libvirt session)"; onClicked: Quickshell.execDetached(["systemd-run", "--user", "--collect", "--quiet", "--", "virt-manager", "--connect", "qemu:///session"]) }
                                 HubButton { text: "󰓙"; hint: "vmtools doctor"; onClicked: root.act(["term", "vm-doctor"]) }
                             }
                             Repeater {
@@ -399,7 +400,7 @@ ShellRoot {
                                                 Text { text: modelData.backend + "  ·  " + (modelData.vms.length ? modelData.running + "/" + modelData.vms.length + " running" : "no VMs yet"); color: "#9a96b3"; font.family: root.ui; font.pixelSize: 11 }
                                             }
                                             HubButton { text: "󰐊 open"; primary: true; hint: "Open the Construct app"; onClicked: { Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/quickshell/galaxy-vm/start.sh", ({ androidvm: "android", windowsvm: "windows", linuxvm: "linux", iosvm: "ios", macosvm: "macos" })[modelData.tool] || "all"]); root.open = false } }
-                                            HubButton { visible: modelData.tool === "windowsvm" || modelData.tool === "linuxvm"; text: "󰍹"; hint: "virt-manager"; onClicked: root.act(["term", "vm-gui", modelData.tool]) }
+                                            HubButton { visible: modelData.tool === "windowsvm" || modelData.tool === "linuxvm"; text: "󰍹"; hint: "Virtual Machine Manager (libvirt session)"; onClicked: Quickshell.execDetached(["systemd-run", "--user", "--collect", "--quiet", "--", "virt-manager", "--connect", "qemu:///session"]) }
                                         }
                                         Repeater {
                                             model: modelData.vms

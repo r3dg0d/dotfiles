@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Galaxy Disk Map (quickshell -c galaxy-disk). galaxy-disk [tab]
+export PATH="$HOME/.nix-profile/bin:/etc/profiles/per-user/${USER:-$(id -un)}/bin:/run/current-system/sw/bin:$HOME/.config/quickshell/galaxy/runtime/bin:$PATH"
+if quickshell ipc -c galaxy-disk call disk open 2>/dev/null; then
+  [ -n "${1:-}" ] && quickshell ipc -c galaxy-disk call disk tab "$1" >/dev/null 2>&1
+  exit 0
+fi
+cd "$HOME"; export USER="${USER:-$(id -un)}"
+exec quickshell -c galaxy-disk --no-duplicate --daemonize

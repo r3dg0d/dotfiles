@@ -1,0 +1,27 @@
+# backups and editor leftovers
+*.bak
+*.bak-*
+*.swp
+*~
+imgui.ini
+
+# caches, bytecode, logs, venvs, model weights
+*.qmlc
+*.qmlcache
+.qmlcache/
+__pycache__/
+*.pyc
+*.log
+*.qcow2
+*.gguf
+*.safetensors
+*.pt
+*.pth
+*.onnx
+venv/
+.venv/
+runtime/
+
+# local screenshot staging (not for git)
+previews-staging/
+previews-staging.tar

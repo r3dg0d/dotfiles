@@ -1,0 +1,40 @@
+#!/run/current-system/sw/bin/python3
+"""Chooser for xdg-desktop-portal-wlr (chooser_type=dmenu).
+
+xdpw feeds exact labels on stdin, one per line, e.g.
+  Monitor: DP-1 Dell Inc. AW3425DWM ...
+  Window: Some title (55)
+This wrapper shows them in the Quickshell obs-picker, then prints the chosen
+line VERBATIM to stdout (exit 0). Cancel / no selection: prints nothing,
+exit 1 (anything except 127 cancels cleanly in xdpw).
+Quickshell's own stdout is redirected to stderr so xdpw only sees our line.
+"""
+import json, os, subprocess, sys, tempfile
+
+def main() -> int:
+    labels = [l for l in sys.stdin.read().splitlines() if l.strip()]
+    if not labels:
+        return 1
+    tmp = tempfile.mkdtemp(prefix="obs-picker-")
+    items = os.path.join(tmp, "items.json")
+    result = os.path.join(tmp, "result.txt")
+    with open(items, "w") as f:
+        json.dump(labels, f)
+    env = dict(os.environ, OBS_PICKER_ITEMS=items, OBS_PICKER_RESULT=result)
+    try:
+        subprocess.run(["/run/current-system/sw/bin/quickshell", "-c", "obs-picker"], env=env,
+                       stdout=sys.stderr, timeout=300)
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        return 1
+    try:
+        with open(result) as f:
+            chosen = f.read().strip("\n")
+    except FileNotFoundError:
+        return 1
+    if chosen not in labels:
+        return 1
+    print(chosen)
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())

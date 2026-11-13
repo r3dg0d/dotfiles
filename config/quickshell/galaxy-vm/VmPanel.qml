@@ -80,7 +80,9 @@ FloatingWindow {
                 visible: win.kind === "all"; Layout.fillWidth: true; spacing: 8
                 GalaxyButton { text: "󰙨 vmtools doctor"; onClicked: app.term("vmtools doctor") }
                 GalaxyButton { text: "󰆍 TUI"; onClicked: app.term("vmtools tui") }
+                GalaxyButton { text: "󰍹 virt-manager"; hint: "Virtual Machine Manager (libvirt session)"; onClicked: app.launchVirtManager() }
                 Item { Layout.fillWidth: true }
+                Text { text: (app.st.virtManager ? "VIRT-MANAGER" : "VIRT-MANAGER MISSING"); font.family: "Cellforge"; font.pixelSize: 10; color: app.st.virtManager ? "#7dffa8" : "#ffd479" }
                 Text { text: (app.st.docker ? "DOCKER UP" : "DOCKER OFFLINE"); font.family: "Cellforge"; font.pixelSize: 10; color: app.st.docker ? "#7dffa8" : "#ffd479" }
             }
 

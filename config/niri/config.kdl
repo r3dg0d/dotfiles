@@ -135,6 +135,11 @@ spawn-sh-at-startup "bash ~/.config/quickshell/galaxy/start.sh"
 spawn-sh-at-startup "QT_QUICK_CONTROLS_STYLE=Basic quickshell -c galaxy-hub --no-duplicate --daemonize"
 // galaxy power menu, hidden until opened (Mod+Alt+P / waybar ⏻)
 spawn-sh-at-startup "QT_QUICK_CONTROLS_STYLE=Basic quickshell -c galaxy-power --no-duplicate --daemonize"
+// galaxy emoji picker and clipboard history, hidden until opened (Mod+Shift+Period / Mod+E)
+spawn-sh-at-startup "QT_QUICK_CONTROLS_STYLE=Basic quickshell -c galaxy-emoji --no-duplicate --daemonize"
+spawn-sh-at-startup "QT_QUICK_CONTROLS_STYLE=Basic quickshell -c galaxy-clip --no-duplicate --daemonize"
+// the one clipboard watcher (exits at once if it, or a cliphist watcher, is already running)
+spawn-sh-at-startup "bash ~/.config/quickshell/galaxy-clip/start.sh --watch-only"
 
 environment {
     DISPLAY ":0"
@@ -188,6 +193,13 @@ binds {
     Mod+Alt+V repeat=false hotkey-overlay-title="Galaxy: VM constructs" { spawn "bash" "-c" "bash ~/.config/quickshell/galaxy-hub/start.sh constructs"; }
     Mod+Alt+A repeat=false hotkey-overlay-title="Galaxy: audio" { spawn "bash" "-c" "bash ~/.config/quickshell/galaxy-hub/start.sh audio"; }
     Mod+Alt+N repeat=false hotkey-overlay-title="Galaxy: network" { spawn "bash" "-c" "bash ~/.config/quickshell/galaxy-hub/start.sh network"; }
+    Mod+E repeat=false hotkey-overlay-title="Galaxy: clipboard history" { spawn "bash" "-c" "bash ~/.config/quickshell/galaxy-clip/start.sh"; }
+    Mod+Alt+I repeat=false hotkey-overlay-title="Galaxy: AI media" { spawn "bash" "-c" "bash ~/.config/quickshell/galaxy-ai-media/start.sh"; }
+    // Galaxy emoji picker. Mod+Period is niri's default for expel-window-from-column (bound further down),
+    // so it is NOT taken over here. To use Mod+Period for emoji: delete the `Mod+Period { expel-window-from-column; }`
+    // line below (Mod+BracketRight does nearly the same job) and uncomment the first line; then drop the second.
+    // Mod+Period repeat=false hotkey-overlay-title="Galaxy: emoji" { spawn "bash" "-c" "bash ~/.config/quickshell/galaxy-emoji/start.sh"; }
+    Mod+Shift+Period repeat=false hotkey-overlay-title="Galaxy: emoji" { spawn "bash" "-c" "bash ~/.config/quickshell/galaxy-emoji/start.sh"; }
 
     Mod+T hotkey-overlay-title="Terminal: ghostty" { spawn "ghostty"; }
     Mod+Return { spawn "ghostty"; }

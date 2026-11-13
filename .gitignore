@@ -25,3 +25,5 @@ runtime/
 # local screenshot staging (not for git)
 previews-staging/
 previews-staging.tar
+__pycache__/
+.pytest_cache/

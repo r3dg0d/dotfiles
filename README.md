@@ -29,6 +29,8 @@ Plain NixOS, channel-based (nixos-26.05). No home-manager, no flakes required fo
 | `nix/rice.nix` | NixOS module: packages, Nerd Font, SDDM theme (`services.displayManager.sddm.theme = "deep-space"`) |
 | `nix/sddm-theme.nix` | The SDDM theme as a package (Qt 6, imports only `QtQuick`) |
 | `nix/modules/` | Optional snapshots of the machine's rice-related NixOS modules (fonts, Quickshell, kernel, NVIDIA, …). Not imported by `rice.nix` — see [`nix/modules/README.md`](nix/modules/README.md) |
+| `tools/build-emoji-data.py` | Regenerates the emoji picker's data from pinned, checksummed upstream packages |
+| `tools/qs-harness/` | Loads the widgets against a Quickshell stand-in for checks and screenshots without a desktop session |
 | `tools/render.py` | Re-renders `templates/` → `config/` after you change the palette |
 | `tools/gen-wallpaper.py` | Regenerates the wallpaper (numpy + pillow; any size/seed) |
 | `tools/gen-live-wallpaper.py` | Regenerates the live wallpaper (slow rotation, crossfaded so it loops seamlessly; needs ffmpeg) |
@@ -45,7 +47,8 @@ Plain NixOS, channel-based (nixos-26.05). No home-manager, no flakes required fo
   Default binds kept, with `Mod+T` / `Mod+Return` → ghostty, `Mod+D` / `Mod+Space` → fuzzel
   (Papirus-Dark icons, Cellforge), `Print` / `Mod+Shift+S` region screenshot, `Ctrl+Print` screen,
   `Alt+Print` window (saved to `~/Pictures/Screenshots` and copied). Galaxy hub pages on
-  `Mod+Alt+W/S/U/V/A/N`, power menu on `Mod+Alt+P`, media on `Mod+Shift+M`.
+  `Mod+Alt+W/S/U/V/A/N`, power menu on `Mod+Alt+P`, media on `Mod+Shift+M`, clipboard history on `Mod+E`,
+  emoji on `Mod+Shift+Period`, AI Media on `Mod+Alt+I` (see [`config/quickshell/GALAXY-POPUPS.md`](config/quickshell/GALAXY-POPUPS.md)).
 - **ghostty:** [NullType](https://github.com/r3dg0d/nulltype-font) with JetBrainsMono Nerd Font as
   fallback, palette colors for all 16 ANSI slots, padding, 88% opacity with background blur, blinking
   bar cursor in violet, and the [GhostFX](https://github.com/r3dg0d/ghostfx) `nebula` shader
@@ -79,6 +82,9 @@ Scripts use absolute paths and put `/run/wrappers/bin` ahead of `/run/current-sy
 | `galaxy-disk/` | Disk map — a QDirStat / WinDirStat-style treemap with category tabs (Applications, AI Models, Games, VMs, Caches, Media, Projects, Other). `scan.py`; opens from the hub's storage page |
 | `screenshot/` | Screenshot preview / editor |
 | `deepfake/` | Front-end for [r3dg0d/deepfake](https://github.com/r3dg0d/deepfake) (also shipped in that repo's overlay) |
+| `galaxy-emoji/` | Emoji picker: Unicode name / keyword search, skin tones, recents, Twemoji art, copies the exact sequence. `Mod+Shift+Period` |
+| `galaxy-clip/` | Clipboard history: searchable text, image previews, pause, bounded local store, one watcher (`clip.py`). `Mod+E` |
+| `galaxy-ai-media/` | Front end to the [ai-media-cli](https://github.com/r3dg0d/ai-media-cli) hub: model catalog, runners, jobs, local LLM chat. `Mod+Alt+I` |
 | `system-osd/` | Volume / brightness / mic OSD for hardware keys |
 | `keystroke-noise/` | Popup for [KeystrokeNoise](https://github.com/r3dg0d/KeystrokeNoise) |
 | `obs-picker/` | Screencast picker for xdg-desktop-portal-wlr |

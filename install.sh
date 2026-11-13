@@ -92,7 +92,7 @@ fi
 if [ "$DRY" != yes ]; then
   chmod +x "$cfg/niri/wallpaper.sh" 2>/dev/null || true
   find "$cfg/quickshell" -type f \( -name '*.sh' -o -name '*.py' -o -name 'chooser' \) -exec chmod +x {} + 2>/dev/null || true
-  chmod +x "$bindir/galaxy-disk" 2>/dev/null || true
+  chmod +x "$bindir"/galaxy-* 2>/dev/null || true
 fi
 act mkdir -p "$HOME/Pictures/Screenshots"
 

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Emoji Picker
+Comment=Emoji Picker (Galaxy)
+Exec=@HOME@/.local/bin/galaxy-emoji
+Icon=galaxy-disk
+Terminal=false
+Categories=Utility;
+Keywords=galaxy;emoji;

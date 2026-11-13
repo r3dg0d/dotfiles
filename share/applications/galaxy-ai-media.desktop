@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=AI Media
+Comment=AI Media (Galaxy)
+Exec=@HOME@/.local/bin/galaxy-ai-media
+Icon=galaxy-disk
+Terminal=false
+Categories=Utility;
+Keywords=galaxy;ai-media;

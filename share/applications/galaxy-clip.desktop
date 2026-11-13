@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Clipboard History
+Comment=Clipboard History (Galaxy)
+Exec=@HOME@/.local/bin/galaxy-clip
+Icon=galaxy-disk
+Terminal=false
+Categories=Utility;
+Keywords=galaxy;clip;

@@ -1,41 +1,69 @@
-// deep-space — waybar (niri)
+// deep-space — waybar (niri) · re-rice 2026-10-19
+// Galaxy hub panels: bash ~/.config/quickshell/galaxy-hub/start.sh <weather|storage|updater|network>
 {
   "layer": "top",
   "position": "top",
-  "height": 34,
+  "height": 36,
   "margin-top": 8,
   "margin-left": 12,
   "margin-right": 12,
-  "spacing": 8,
+  "spacing": 6,
   "modules-left": ["custom/logo", "niri/workspaces", "niri/window"],
-  "modules-center": ["clock"],
-  "modules-right": ["tray", "pulseaudio", "network", "battery"],
+  "modules-center": ["custom/kopuz", "clock", "custom/weather"],
+  "modules-right": ["tray", "custom/updates", "custom/vms", "custom/storage", "pulseaudio", "custom/net", "custom/power"],
 
-  "custom/logo": { "format": "", "tooltip": false, "on-click": "fuzzel" },
+  "custom/power": { "format": "⏻", "tooltip": true, "tooltip-format": "Power menu · Mod+Alt+P", "on-click": "bash ~/.config/quickshell/galaxy-power/start.sh", "on-click-right": "bash ~/.config/quickshell/galaxy-power/power.sh lock" },
+  "custom/logo": { "format": "", "tooltip": true, "tooltip-format": "Apps · right-click: galaxy hub", "on-click": "fuzzel", "on-click-right": "bash ~/.config/quickshell/galaxy-hub/start.sh weather" },
   "niri/workspaces": {
     "format": "{icon}",
-    "format-icons": { "active": "", "default": "", "urgent": "" }
+    "format-icons": { "active": "◆", "default": "◇", "urgent": "" }
   },
-  "niri/window": { "format": "{title}", "max-length": 48, "separate-outputs": true },
+  "niri/window": { "format": "{title}", "max-length": 48, "separate-outputs": true, "rewrite": { "": "✦ deep space" } },
+
+  "custom/kopuz": {
+    "format": "{}",
+    "escape": false,
+    "exec": "bash ~/.config/quickshell/galaxy/bar.sh",
+    "return-type": "json",
+    "interval": 2,
+    "max-length": 40,
+    "on-click": "bash ~/.config/quickshell/galaxy/start.sh --daemonize",
+    "on-click-right": "bash ~/.config/quickshell/galaxy/bar.sh play-pause",
+    "on-click-middle": "quickshell ipc -c galaxy call galaxy openLyrics",
+    "on-scroll-up": "bash ~/.config/quickshell/galaxy/bar.sh next",
+    "on-scroll-down": "bash ~/.config/quickshell/galaxy/bar.sh previous"
+  },
   "clock": {
-    "format": "  {:%H:%M}",
-    "format-alt": "  {:%a %d %b  %H:%M}",
+    "format": "{:%I:%M %p}",
+    "format-alt": "{:%a %d %b  %I:%M %p}",
     "tooltip-format": "<tt><small>{calendar}</small></tt>",
-    "calendar": { "format": { "today": "<span color='#b46bff'><b>{}</b></span>" } }
+    "calendar": { "mode": "month", "format": { "today": "<span color='#b46bff'><b>{}</b></span>", "weekdays": "<span color='#5d5878'>{}</span>" } }
   },
+  "custom/weather": {
+    "exec": "python3 ~/.config/quickshell/galaxy-hub/hub.py bar weather",
+    "return-type": "json", "interval": 900, "escape": true,
+    "on-click": "bash ~/.config/quickshell/galaxy-hub/start.sh weather"
+  },
+  "custom/updates": {
+    "exec": "python3 ~/.config/quickshell/galaxy-hub/hub.py bar updates",
+    "return-type": "json", "interval": 300, "escape": true,
+    "on-click": "bash ~/.config/quickshell/galaxy-hub/start.sh updater", "on-click-right": "bash ~/.config/quickshell/galaxy-hub/start.sh storage"
+  },
+  "custom/vms": { "format": "󰍺", "tooltip-format": "VM Constructs (Windows / Linux / Android)", "on-click": "bash ~/.config/quickshell/galaxy-hub/start.sh constructs" },
+  "custom/storage": { "format": "󱘲", "tooltip-format": "Nix store optimizer", "on-click": "bash ~/.config/quickshell/galaxy-hub/start.sh storage" },
   "pulseaudio": {
     "format": "{icon}  {volume}%",
-    "format-muted": "  muted",
-    "format-icons": { "default": ["", "", ""] },
-    "on-click": "pavucontrol",
+    "format-muted": "󰝟  muted",
+    "format-icons": { "default": ["󰕿", "󰖀", "󰕾"] },
+    "on-click": "bash ~/.config/quickshell/galaxy-hub/start.sh audio",
+    "on-click-right": "pavucontrol",
+    "on-click-middle": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
     "scroll-step": 5
   },
-  "network": {
-    "format-wifi": "  {essid}",
-    "format-ethernet": "󰈀  wired",
-    "format-disconnected": "󰖪  offline",
-    "tooltip-format": "{ifname}  {ipaddr}",
-    "on-click": "nm-connection-editor"
+  "custom/net": {
+    "exec": "python3 ~/.config/quickshell/galaxy-hub/hub.py bar net",
+    "return-type": "json", "interval": 15, "escape": true,
+    "on-click": "bash ~/.config/quickshell/galaxy-hub/start.sh network", "on-click-right": "nm-connection-editor"
   },
   "battery": {
     "states": { "warning": 25, "critical": 12 },

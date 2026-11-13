@@ -15,6 +15,11 @@ input {
     focus-follows-mouse max-scroll-amount="0%"
 }
 
+output "DP-1" {
+    mode "3440x1440@179.989"
+    scale 1
+}
+
 prefer-no-csd
 
 layout {
@@ -30,19 +35,20 @@ layout {
     default-column-width { proportion 0.5; }
 
     focus-ring {
-        width 2
-        active-gradient from="#b46bff" to="#d4b8ff" angle=135
-        inactive-color "#26223a"
+        width 3
+        active-gradient from="#7c4dff" to="#d4b8ff" angle=45 relative-to="workspace-view"
+        inactive-color "#1a1630"
     }
     border {
         off
     }
     shadow {
         on
-        softness 30
-        spread 4
-        offset x=0 y=6
-        color "#00000099"
+        softness 40
+        spread 6
+        offset x=0 y=8
+        color "#7c4dff33"
+        inactive-color "#00000066"
     }
     struts {
         top 2
@@ -50,17 +56,67 @@ layout {
 }
 
 window-rule {
-    geometry-corner-radius 12
+    match title="^Galaxy Deepfake$"
+    open-floating true
+}
+
+window-rule {
+    match title="^Galaxy Screenshot$"
+    open-floating true
+}
+
+window-rule {
+    match title="^Galaxy Lyrics$"
+    open-floating true
+}
+
+// galaxy-vm Construct apps (quickshell FloatingWindows): float, rounded, no tiling
+window-rule {
+    match title="^Galaxy (Android|Windows|Linux|iOS|macOS|VM) Construct$"
+    match title="^Galaxy Disk Map$"
+    open-floating true
+    geometry-corner-radius 22
+    clip-to-geometry true
+}
+// sudo terminals launched by galaxy-hub
+window-rule {
+    match title="^Galaxy (Updater|Storage|Network|Constructs)$"
+    open-floating true
+    default-column-width { fixed 980; }
+    default-window-height { fixed 560; }
+}
+
+window-rule {
+    geometry-corner-radius 14
     clip-to-geometry true
 }
 window-rule {
     match is-active=false
     opacity 0.96
 }
+// Construct apps draw their own ~0.95 background; don't stack the inactive dim on top
+window-rule {
+    match title="^Galaxy (Android|Windows|Linux|iOS|macOS|VM) Construct$"
+    match title="^Galaxy Disk Map$"
+    opacity 1.0
+}
 
 layer-rule {
     match namespace="^(wallpaper|mpvpaper)$"
     place-within-backdrop true
+}
+
+// galaxy quickshell panels: rounded, violet-tinted shadow like windows
+layer-rule {
+    match namespace="^galaxy-(hub|system-osd)$"
+    geometry-corner-radius 22
+    shadow {
+        on
+        softness 40
+        spread 4
+        offset x=0 y=8
+        color "#7c4dff40"
+    }
 }
 
 overview {
@@ -74,9 +130,19 @@ spawn-at-startup "xwayland-satellite"
 spawn-sh-at-startup "sh ~/.config/niri/wallpaper.sh"
 spawn-at-startup "waybar"
 spawn-at-startup "mako"
+spawn-sh-at-startup "bash ~/.config/quickshell/galaxy/start.sh"
+// galaxy hub (weather / storage / updater / network), hidden until opened
+spawn-sh-at-startup "QT_QUICK_CONTROLS_STYLE=Basic quickshell -c galaxy-hub --no-duplicate --daemonize"
+// galaxy power menu, hidden until opened (Mod+Alt+P / waybar ⏻)
+spawn-sh-at-startup "QT_QUICK_CONTROLS_STYLE=Basic quickshell -c galaxy-power --no-duplicate --daemonize"
 
 environment {
     DISPLAY ":0"
+}
+
+cursor {
+    xcursor-theme "Cursor-Concept-3-HDPi-Dark"
+    xcursor-size 32
 }
 
 hotkey-overlay {
@@ -85,23 +151,58 @@ hotkey-overlay {
 
 animations {
     slowdown 1.0
+    workspace-switch {
+        spring damping-ratio=0.85 stiffness=900 epsilon=0.0001
+    }
+    horizontal-view-movement {
+        spring damping-ratio=0.85 stiffness=800 epsilon=0.0001
+    }
+    window-movement {
+        spring damping-ratio=0.8 stiffness=800 epsilon=0.0001
+    }
+    window-resize {
+        spring damping-ratio=0.9 stiffness=800 epsilon=0.0001
+    }
+    window-open {
+        duration-ms 220
+        curve "ease-out-expo"
+    }
+    window-close {
+        duration-ms 160
+        curve "ease-out-quad"
+    }
+    overview-open-close {
+        spring damping-ratio=0.9 stiffness=800 epsilon=0.0001
+    }
 }
 
 binds {
+    // F1-F12 are left as plain function keys (they used to be bound to OSD actions here).
+    Mod+Shift+K repeat=false hotkey-overlay-title="Toggle typing sounds" { spawn "python3" "/home/r3dg0d/.config/quickshell/keystroke-noise/toggle.py"; }
+    Mod+Shift+M hotkey-overlay-title="Galaxy media" { spawn "bash" "-c" "bash ~/.config/quickshell/galaxy/start.sh"; }
     Mod+Shift+Slash { show-hotkey-overlay; }
+    Mod+Alt+P repeat=false hotkey-overlay-title="Galaxy: power menu" { spawn "bash" "-c" "bash ~/.config/quickshell/galaxy-power/start.sh"; }
+    Mod+Alt+W repeat=false hotkey-overlay-title="Galaxy: weather" { spawn "bash" "-c" "bash ~/.config/quickshell/galaxy-hub/start.sh weather"; }
+    Mod+Alt+S repeat=false hotkey-overlay-title="Galaxy: storage optimizer" { spawn "bash" "-c" "bash ~/.config/quickshell/galaxy-hub/start.sh storage"; }
+    Mod+Alt+U repeat=false hotkey-overlay-title="Galaxy: NixOS updater" { spawn "bash" "-c" "bash ~/.config/quickshell/galaxy-hub/start.sh updater"; }
+    Mod+Alt+V repeat=false hotkey-overlay-title="Galaxy: VM constructs" { spawn "bash" "-c" "bash ~/.config/quickshell/galaxy-hub/start.sh constructs"; }
+    Mod+Alt+A repeat=false hotkey-overlay-title="Galaxy: audio" { spawn "bash" "-c" "bash ~/.config/quickshell/galaxy-hub/start.sh audio"; }
+    Mod+Alt+N repeat=false hotkey-overlay-title="Galaxy: network" { spawn "bash" "-c" "bash ~/.config/quickshell/galaxy-hub/start.sh network"; }
 
     Mod+T hotkey-overlay-title="Terminal: ghostty" { spawn "ghostty"; }
     Mod+Return { spawn "ghostty"; }
     Mod+D hotkey-overlay-title="Launcher: fuzzel" { spawn "fuzzel"; }
     Mod+Space hotkey-overlay-title="Launcher: fuzzel" { spawn "fuzzel"; }
     Super+Alt+L hotkey-overlay-title="Lock screen" { spawn "swaylock" "-f" "-c" "07060d"; }
-
-    XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.05+" "-l" "1.0"; }
-    XF86AudioLowerVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.05-"; }
-    XF86AudioMute        allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
-    XF86AudioMicMute     allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
-    XF86MonBrightnessUp   allow-when-locked=true { spawn "brightnessctl" "set" "5%+"; }
-    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "set" "5%-"; }
+    XF86AudioRaiseVolume { spawn "bash" "-c" "python3 ~/.config/quickshell/system-osd/action.py volume-up"; }
+    XF86AudioLowerVolume { spawn "bash" "-c" "python3 ~/.config/quickshell/system-osd/action.py volume-down"; }
+    XF86AudioMute repeat=false { spawn "bash" "-c" "python3 ~/.config/quickshell/system-osd/action.py mute"; }
+    XF86AudioMicMute repeat=false { spawn "bash" "-c" "python3 ~/.config/quickshell/system-osd/action.py microphones"; }
+    XF86AudioPlay repeat=false { spawn "bash" "-c" "python3 ~/.config/quickshell/system-osd/action.py play-pause"; }
+    XF86AudioNext { spawn "bash" "-c" "python3 ~/.config/quickshell/system-osd/action.py next"; }
+    XF86AudioPrev { spawn "bash" "-c" "python3 ~/.config/quickshell/system-osd/action.py previous"; }
+    XF86MonBrightnessUp { spawn "bash" "-c" "python3 ~/.config/quickshell/system-osd/action.py brightness-up"; }
+    XF86MonBrightnessDown { spawn "bash" "-c" "python3 ~/.config/quickshell/system-osd/action.py brightness-down"; }
 
     Mod+O repeat=false { toggle-overview; }
     Mod+Q { close-window; }
@@ -175,14 +276,19 @@ binds {
     Mod+Shift+Minus { set-window-height "-10%"; }
     Mod+Shift+Equal { set-window-height "+10%"; }
 
-    // Screenshots: region picker, whole screen, focused window (saved + copied to clipboard)
-    Print { screenshot; }
-    Mod+Shift+S { screenshot; }
-    Ctrl+Print { screenshot-screen; }
-    Alt+Print { screenshot-window; }
+    // Galaxy screenshots: region, screen, focused window → preview and editor
+    Print repeat=false { spawn "bash" "-c" "python3 ~/.config/quickshell/screenshot/capture.py region"; }
+    Mod+Shift+S repeat=false { spawn "bash" "-c" "python3 ~/.config/quickshell/screenshot/capture.py region"; }
+    Ctrl+Print repeat=false { spawn "bash" "-c" "python3 ~/.config/quickshell/screenshot/capture.py screen"; }
+    Alt+Print repeat=false { spawn "bash" "-c" "python3 ~/.config/quickshell/screenshot/capture.py window"; }
 
     Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
     Mod+Shift+E { quit; }
     Ctrl+Alt+Delete { quit; }
     Mod+Shift+P { power-off-monitors; }
+}
+
+window-rule {
+    match title="^Galaxy Disk Map$"
+    open-floating true
 }

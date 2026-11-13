@@ -1,33 +1,79 @@
-/* deep-space — waybar */
+/* deep-space — waybar · re-rice 2026-10-19
+   Cellforge labels · Zerodot LED digits (clock, workspaces) · JetBrainsMono Nerd Font icons */
 * {
-  font-family: "JetBrainsMono Nerd Font", sans-serif;
-  font-size: 13px;
+  font-family: "Cellforge", "JetBrainsMono Nerd Font", sans-serif;
+  font-size: 14px;
   min-height: 0;
   border: none;
   border-radius: 0;
 }
 window#waybar { background: transparent; color: {{text}}; }
-tooltip { background: rgba({{surface_rgb}}, 0.95); border: 1px solid {{line}}; border-radius: 10px; }
-tooltip label { color: {{text}}; }
+tooltip { background: rgba(15, 13, 26, 0.97); border: 1px solid #3a2f5c; border-radius: 12px; }
+tooltip label { color: {{text}}; font-family: "Cellforge", "JetBrainsMono Nerd Font"; padding: 4px; }
 
-#custom-logo, #workspaces, #window, #clock, #tray, #pulseaudio, #network, #battery {
-  background: linear-gradient(135deg, rgba({{violet_rgb}}, 0.16), rgba({{surface_rgb}}, 0.72) 60%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+#custom-logo, #workspaces, #window, #custom-kopuz, #clock, #custom-weather,
+#tray, #custom-updates, #custom-vms, #custom-storage, #pulseaudio, #custom-net, #battery {
+  background: linear-gradient(135deg, rgba(124, 77, 255, 0.20), rgba(15, 13, 26, 0.86) 62%);
+  border: 1px solid rgba(180, 107, 255, 0.16);
   border-radius: 999px;
   padding: 0 14px;
   margin: 0;
   color: {{text}};
+  transition: all 160ms ease;
 }
-#custom-logo { color: {{violet}}; font-size: 16px; padding: 0 14px 0 12px; }
-window#waybar.empty #window { background: transparent; border-color: transparent; }
+#custom-logo:hover, #custom-kopuz:hover, #custom-weather:hover, #custom-updates:hover,
+#custom-storage:hover, #custom-vms:hover, #pulseaudio:hover, #custom-net:hover, #clock:hover {
+  border-color: rgba(212, 184, 255, 0.55);
+  background: linear-gradient(135deg, rgba(180, 107, 255, 0.32), rgba(26, 22, 48, 0.92) 62%);
+}
+
+/* icon-only / icon-led pills keep the Nerd Font first */
+#custom-logo, #custom-storage, #custom-vms, #custom-updates, #pulseaudio, #custom-net, #battery, #tray {
+  font-family: "JetBrainsMono Nerd Font", "Cellforge", sans-serif;
+}
+#custom-logo { color: {{violet}}; font-size: 17px; padding: 0 15px 0 12px; }
+#custom-storage, #custom-vms { color: {{subtext}}; padding: 0 13px; }
+
 #workspaces { padding: 0 6px; }
-#workspaces button { color: {{subtext}}; padding: 0 6px; background: transparent; border-radius: 999px; }
-#workspaces button.active { color: {{violet}}; }
+#workspaces button {
+  font-family: "Zerodot", "JetBrainsMono Nerd Font", monospace;
+  color: {{muted}}; padding: 0 6px; background: transparent; border-radius: 999px; box-shadow: none;
+}
+#workspaces button.active { color: {{lavender}}; text-shadow: 0 0 6px rgba(180, 107, 255, 0.9); }
 #workspaces button.urgent { color: {{red}}; }
-#workspaces button:hover { background: rgba({{violet_rgb}}, 0.18); box-shadow: none; }
-#clock { color: {{lavender}}; font-weight: bold; }
-#pulseaudio.muted, #network.disconnected { color: {{muted}}; }
-#network { color: {{green}}; }
-#battery.charging { color: {{green}}; }
-#battery.warning:not(.charging) { color: {{yellow}}; }
-#battery.critical:not(.charging) { color: {{red}}; }
+#workspaces button:hover { background: rgba(180, 107, 255, 0.18); color: {{text}}; }
+
+window#waybar.empty #window { background: transparent; border-color: transparent; }
+#window { color: {{subtext}}; }
+
+#clock {
+  font-family: "Zerodot", "JetBrainsMono Nerd Font", monospace;
+  font-size: 17px; font-weight: 900; letter-spacing: 0px; color: #ffffff;
+  text-shadow: 0 0 3px rgba(180, 107, 255, 0.9);
+}
+#custom-kopuz { color: {{lavender}}; }
+#custom-kopuz.playing { border-color: rgba(180, 107, 255, 0.5); }
+#custom-kopuz.paused, #custom-kopuz.idle { color: {{subtext}}; }
+#custom-weather { color: {{text}}; }
+#custom-updates.available { color: {{void}}; background: linear-gradient(135deg, {{violet}}, {{nebula}}); border-color: {{lavender}}; }
+#custom-updates.current { padding: 0; border: none; background: transparent; }
+#custom-net { color: {{lavender}}; }
+#custom-net.vpn { color: {{green}}; }
+#custom-net.down { color: {{red}}; }
+#pulseaudio { color: {{lavender}}; }
+#pulseaudio.muted { color: {{muted}}; }
+#battery.warning { color: {{yellow}}; }
+#battery.critical { color: {{red}}; }
+
+/* power pill (rightmost) */
+#custom-power {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 15px;
+  color: #ff8fb1;
+  padding: 0 14px 0 12px;
+  margin-right: 6px;
+  border-radius: 14px;
+  background: rgba(42, 18, 48, 0.75);
+  border: 1px solid rgba(255, 143, 177, 0.35);
+}
+#custom-power:hover { background: rgba(255, 143, 177, 0.22); color: #ffffff; }
